@@ -5,7 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Discord;
+using Discord.Audio;
 
 
 namespace Ene
@@ -28,14 +28,16 @@ namespace Ene
             _client.Log += Log;
             await _client.LoginAsync(TokenType.Bot, Config.bot.token);
             await _client.StartAsync();
-
             Game game = new Game("Kagerou Project", ActivityType.Listening);
             await _client.SetActivityAsync(game);
             await _client.SetStatusAsync(UserStatus.AFK);
             _handler = new CommandHandler();
             await _handler.InitializeAsync(_client);
             await Task.Delay(-1); 
+
+
         }
+
 
         public async Task Log(LogMessage msg)
         {
