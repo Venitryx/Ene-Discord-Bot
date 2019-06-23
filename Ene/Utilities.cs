@@ -8,25 +8,25 @@ namespace Ene
 {
     class Utilities
     {
-        private static Dictionary<string, string> alerts;
+        private static Dictionary<string, string> messages;
 
         static Utilities()
         {
-            string json = File.ReadAllText("SystemLang/alerts.json");
+            string json = File.ReadAllText("SystemLang/messages.json");
             var data = JsonConvert.DeserializeObject<dynamic>(json);
-            alerts = data.ToObject<Dictionary<string, string>>();
+            messages = data.ToObject<Dictionary<string, string>>();
         }
 
         public static string GetAlert(string key)
         {
-            if (alerts.ContainsKey(key)) return alerts[key];
+            if (messages.ContainsKey(key)) return messages[key];
             return "";
         }
 
         
         public static string GetAlert(string key, params object[] parameter)
         {
-            if (alerts.ContainsKey(key)) return string.Format(alerts[key], parameter);
+            if (messages.ContainsKey(key)) return string.Format(messages[key], parameter);
             return "";
         }
         
