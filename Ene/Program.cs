@@ -48,14 +48,7 @@ namespace Ene
             await _client.StartAsync();
             _services = SetUpServices();
             Global.Client = _client;
-
-            if (RepeatingTimer.isSongCountEqual())
-            {
-                Random r = new Random();
-                RepeatingTimer.songIndex = r.Next(0, RepeatingTimer.songCount);
-            }
-
-            Game game = new Game(RepeatingTimer.getNameOfSong(RepeatingTimer.songIndex, false), ActivityType.Listening);
+            Game game = RepeatingTimer.pickRandomSongDisplay();
             await Global.Client.SetActivityAsync(game);
             var cmdHandler = new CommandHandler(_client, _cmdService, _services);
             await cmdHandler.InitializeAsync();

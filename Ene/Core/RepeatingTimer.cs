@@ -12,7 +12,7 @@ namespace Ene.Core
 {
     internal static class RepeatingTimer
     {
-        private static Timer loopingSongActivityTimer, loopingAfkTimer;
+        internal static Timer loopingSongActivityTimer, loopingAfkTimer;
         private static SocketTextChannel channel;
         private static Game game;
 
@@ -94,6 +94,16 @@ namespace Ene.Core
                 Console.WriteLine("Song lengths are not equal!");
                 return false;
             }
+        }
+
+        internal static Game pickRandomSongDisplay()
+        {
+            if (RepeatingTimer.isSongCountEqual())
+            {
+                Random r = new Random();
+                RepeatingTimer.songIndex = r.Next(0, RepeatingTimer.songCount);
+            }
+            return new Game(RepeatingTimer.getNameOfSong(RepeatingTimer.songIndex, false), ActivityType.Listening);
         }
 
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)

@@ -54,12 +54,13 @@ namespace Ene.Services
             }
 
             var track = results.Tracks.FirstOrDefault();
-            RepeatingTimer.StartSongActivityTimer().Dispose();
+            RepeatingTimer.loopingSongActivityTimer.Stop();
 
             if (_player.IsPlaying)
             {
                 Game game = new Game(track.Title, ActivityType.Listening);
                 await Global.Client.SetActivityAsync(game);
+                RepeatingTimer.loopingSongActivityTimer.Stop();
 
                 _player.Queue.Enqueue(track);
                 return String.Format("You added {0} to the queue!", track.Title);
@@ -68,6 +69,7 @@ namespace Ene.Services
             {
                 Game game = new Game(track.Title, ActivityType.Listening);
                 await Global.Client.SetActivityAsync(game);
+                RepeatingTimer.loopingSongActivityTimer.Stop();
 
                 await _player.PlayAsync(track);
                 return String.Format("Now Playing: {0}", track.Title);
@@ -80,19 +82,22 @@ namespace Ene.Services
                 return;
             await _player.StopAsync();
             RepeatingTimer.StartSongActivityTimer().Start();
+            RepeatingTimer.pickRandomSongDisplay();
         }
 
         public async Task<string> SkipAsync()
         {
             if (_player is null || _player.Queue.Items.Count() is 0)
-                return "Hey, nothing's in the queue.";
+            {
+                return "Hey, nothing's playing.";
+            }
 
             var oldTrack = _player.CurrentTrack;
             await _player.SkipAsync();
 
             Game game = new Game(_player.CurrentTrack.Title, ActivityType.Listening);
             await Global.Client.SetActivityAsync(game);
-            RepeatingTimer.StartSongActivityTimer().Dispose();
+            RepeatingTimer.loopingSongActivityTimer.Stop();
 
             return String.Format("Fine. Skipping: {0} \nNow Playing: {1}", oldTrack.Title, _player.CurrentTrack.Title);
         }
@@ -158,7 +163,9 @@ namespace Ene.Services
                 var embed = new EmbedBuilder();
                 embed.WithDescription("There are no more songs.");
                 embed.WithColor(mainColor);
+
                 RepeatingTimer.StartSongActivityTimer().Start();
+                RepeatingTimer.pickRandomSongDisplay();
                 await player.TextChannel.SendMessageAsync("", false, embed.Build());
                 return;
             }
