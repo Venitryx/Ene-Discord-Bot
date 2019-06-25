@@ -15,17 +15,24 @@ namespace Ene
 {
     class CommandHandler
     {
-        DiscordSocketClient _client;
-        CommandService _service;
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _cmdService;
+        private readonly IServiceProvider _services;
 
         Bot AI = new Bot();
         private User myUser;
 
-        public async Task InitializeAsync(DiscordSocketClient client)
+        public CommandHandler(DiscordSocketClient client, CommandService cmdService, IServiceProvider services)
         {
             _client = client;
-            _service = new CommandService();
-            await _service.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+            _cmdService = cmdService;
+            _services = services;
+        }
+
+        public async Task InitializeAsync()
+        {
+            await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            _cmdService.Log += LogAsync;
             _client.MessageReceived += HandleCommandAsync;
         } 
         
@@ -41,7 +48,7 @@ namespace Ene
             if(msg.HasStringPrefix(Config.bot.cmdPrefix, ref argPos) 
                 || msg.HasMentionPrefix(_client.CurrentUser, ref argPos))
             {
-                var result = await _service.ExecuteAsync(context, argPos, null);
+                var result = await _cmdService.ExecuteAsync(context, argPos, _services);
                 if(!result.IsSuccess)
                 {
                     switch (result.Error)
@@ -69,6 +76,12 @@ namespace Ene
                 var afkTimer = RepeatingTimer.StartAfkTimer();
             }
 
+        }
+
+        private Task LogAsync(LogMessage logMessage)
+        {
+            Console.WriteLine(logMessage.Message);
+            return Task.CompletedTask;
         }
     }
 }
