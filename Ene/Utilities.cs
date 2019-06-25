@@ -22,15 +22,14 @@ namespace Ene
             if (messages.ContainsKey(key)) return messages[key];
             return "";
         }
-
         
         public static string GetAlert(string key, params object[] parameter)
         {
             if (messages.ContainsKey(key)) return string.Format(messages[key], parameter);
             return "";
         }
-        
-       
+
+
         //will add this back if code doesn't work
         /*
         public static string GetFormattedAlert(string key, params object[] parameter)

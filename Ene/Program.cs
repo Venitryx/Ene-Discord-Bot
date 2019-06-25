@@ -32,11 +32,21 @@ namespace Ene
 
             _client.Log += Log;
             _client.Ready += RepeatingTimer.StartSongActivityTimer;
+            _client.Ready += RepeatingTimer.StartAfkTimer;
             await _client.LoginAsync(TokenType.Bot, Config.bot.token);
             await _client.StartAsync();
             Global.Client = _client;
+
+            if (RepeatingTimer.isSongCountEqual())
+            {
+                Random r = new Random();
+                RepeatingTimer.songIndex = r.Next(0, RepeatingTimer.songCount);
+            }
+
+            Game game = new Game(RepeatingTimer.getNameOfSong(RepeatingTimer.songIndex, false), ActivityType.Listening);
+            await Global.Client.SetActivityAsync(game);
             _handler = new CommandHandler();
-            await _handler.InitializeAsync(_client);
+            await _handler.InitializeAsync(_client);;
             await Task.Delay(-1); 
 
 

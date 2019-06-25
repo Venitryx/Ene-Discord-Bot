@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using System.Net;
+using System.Diagnostics;
+
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
+using Discord.Audio;
+
 using Ene.Core.UserAccounts;
 using NReco.ImageGenerator;
-using System.IO;
-using System.Net;
 using Newtonsoft.Json;
 using CoreHtmlToImage;
 using AIMLbot;
@@ -19,9 +24,7 @@ namespace Ene.Modules
     public class Misc : ModuleBase<SocketCommandContext>
     {
         public Color mainColor = new Color(103, 163, 227);
-        String punctuation = "?,;";
-        String[] firstPersonPronouns = { "I", "me", "my", "mine", "our", "ours"};
-        String[] secondPersonPronouns = { "you", "your", "yours"};
+        String punctuation = "?;";
 
         /*[Command("what are my stats?")]
         public async Task MyStats()
@@ -30,6 +33,41 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync($"You have { account.XP} XP and {account.Points} points.");
         }
         */
+
+        [Command("join the channel.", RunMode = RunMode.Async)]
+        public async Task JoinChannel(IVoiceChannel channel = null)
+        {
+            // Get the audio channel
+            channel = channel ?? (Context.User as IGuildUser)?.VoiceChannel;
+            if (channel == null) { await Context.Channel.SendMessageAsync("User must be in a voice channel, or a voice channel must be passed as an argument."); return; }
+            var audioClient = await channel.ConnectAsync();
+            await SendAsync(audioClient, "C:\\Users\\codev\\Documents\\GitHub\\Ene-Discord-Bot\\Ene\\bin\\Debug\\netcoreapp2.2");
+            
+        }
+
+        private Process CreateStream(string path)
+        {
+            return Process.Start(new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+            });
+        }
+
+        private async Task SendAsync(IAudioClient client, string path)
+        {
+            // Create FFmpeg using the previous example
+            using (var ffmpeg = CreateStream(path))
+            using (var output = ffmpeg.StandardOutput.BaseStream)
+            using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
+            {
+                try { await output.CopyToAsync(discord); }
+                finally { await discord.FlushAsync(); }
+            }
+        }
+
         [Command("get random person.")]
         public async Task GetRandomPerson()
         {
@@ -119,10 +157,78 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
+        [RequireOwner]
+        [Command("say and delete")]
+        public async Task SecretSay([Remainder]string msg)
+        {
+            var embed = new EmbedBuilder();
+            embed.WithDescription(msg);
+            embed.WithColor(mainColor);
+            await Context.Message.DeleteAsync();
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [RequireOwner]
+        [Command("whisper")]
+        public async Task whisper([Remainder]string msg)
+        {
+            var embed = new EmbedBuilder();
+            msg = SubstitutePronouns(msg);
+            msg = SubstituteVerbs(msg);
+            embed.WithDescription(msg);
+            embed.WithColor(mainColor);
+            await Context.Client.GetUser(232345332162363394).SendMessageAsync("", false, embed.Build());
+        }
+
+        internal string SubstitutePronouns(string previousString)
+        {
+            string[] words = previousString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Equals("I"))
+                    words[i] = words[i].Replace("I", "you");
+                else if (words[i].Equals("me"))
+                    words[i] = words[i].Replace("me", "you");
+                else if (words[i].Equals("my"))
+                    words[i] = words[i].Replace("my", "your");
+                else if (words[i].Equals("our"))
+                    words[i] = words[i].Replace("our", "your");
+                else if (words[i].Equals("mine"))
+                    words[i] = words[i].Replace("mine", "yours");
+                else if (words[i].Equals("ours"))
+                    words[i] = words[i].Replace("ours", "yours");
+            }
+            return string.Join(" ", words);
+        }
+
+        internal string SubstituteVerbs(string previousString)
+        {
+            string[] words = previousString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Equals("am"))
+                    words[i] = words[i].Replace("am", "are");
+                else if (words[i].Equals("are"))
+                    words[i] = words[i].Replace("are", "am");
+            }
+            return string.Join(" ", words);
+        }
+
+        internal string RemoveFanboys(string previousString)
+        {
+            string[] words = previousString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if(words[0].Equals("for") || words[0].Equals("and") || words[0].Equals("nor") || words[0].Equals("but")
+                || words[0].Equals("or") || words[0].Equals("yet") || words[0].Equals("so"))
+            {
+                words[0] = "";
+            }
+            return string.Join(" ", words);
+        }
+
         [Command("should I")]
         public async Task Pick([Remainder]string msg)
         {
-            string[] options = msg.Split(new String[] { "or", ", " }, StringSplitOptions.RemoveEmptyEntries);
+            string[] options = msg.Split(new String[] {","}, StringSplitOptions.RemoveEmptyEntries);
 
             if (options.Length is 1)
             {
@@ -149,18 +255,27 @@ namespace Ene.Modules
             {
                 for (int i = 0; i < options.Length; i++)
                 {
-                    if (options[i].StartsWith("or"))
-                    {
-                        options[i] = options[i].Substring(2, options[i].Length);
-                    }
-                    string s = options[i].Substring(options[i].Length - 1);
-                    if (punctuation.Contains(s))
-                    {
-                        options[i] = options[i].Replace('?', '.');
-                        options[i] = options[i].Replace(';', '.');
+                    string newString;
+                    options[i] = RemoveFanboys(options[i]);
 
+                    string punctuationString = options[i].Substring(options[i].Length - 1);
+                    if (punctuation.Contains(punctuationString))
+                    {
+                        newString = options[i].Substring(0, options[i].Length - 1);
+                        newString = SubstitutePronouns(newString);
+                        newString = SubstituteVerbs(newString);
+                        punctuationString = punctuationString.Replace('?', '.');
+                        punctuationString = punctuationString.Replace(';', '.');
+                        newString += punctuationString;
                     }
-                    else options[i] = options[i] + ".";
+                    else
+                    {
+                        newString = options[i];
+                        newString = SubstitutePronouns(newString);
+                        newString = SubstituteVerbs(newString);
+                        newString += ".";
+                    }
+                    options[i] = newString;
                 }
 
                 Random r = new Random();

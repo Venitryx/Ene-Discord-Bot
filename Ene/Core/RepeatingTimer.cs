@@ -12,22 +12,23 @@ namespace Ene.Core
 {
     internal static class RepeatingTimer
     {
-        private static Timer loopingSongActivityTimer;
+        private static Timer loopingSongActivityTimer, loopingAfkTimer;
         private static SocketTextChannel channel;
         private static Game game;
 
-        private static string[] songNamesEnglish = { "Jinzou Enemy", "Mekakushi Code", "Kagerou Daze", "Headphone Actor",
+        internal static string[] songNamesEnglish = { "Jinzou Enemy", "Mekakushi Code", "Kagerou Daze", "Headphone Actor",
             "Souzou Forest", "Konoha's State of the World", "Kisaragi Attention", "Children Record", "Yobanashi Deceive",
         "Lost Time Memory", "Ayano's Theory of Happiness", "Otsukimi Recital", "Yuukei Yesterday", "Outer Science",
             "Summertime Record", "Shissou Word", "Additional Memory", "Toumei Answer", "Ene's Cyber Journey", "Gunjou Rain",
         "Shinigami Record", "Dead and Seek", "Mary's Fictional World", "Shounen Brave", "Daze"};
-        private static string[] songNamesJapanese = { "人造エネミー", "メカクシコード", "カゲロウデイズ", "ヘッドフォンアクター",
+        internal static string[] songNamesJapanese = { "人造エネミー", "メカクシコード", "カゲロウデイズ", "ヘッドフォンアクター",
         "想像フォレスト", "コノハの世界事情", "如月アテンション", "チルドレンレコード", "夜咄ディセイブ", "ロスタイムメモリー",
             "アヤノの幸福理論", "オツキミリサイタル", "夕景イエスタデイ", "アウターサイエンス", "サマータイムレコード", "失想ワアド",
             "アディショナルメモリー", "透明アンサー", "エネの電脳紀行", "群青レイン", "シニガミレコード", "デッドアンドシーク",
             "マリーの架空世界", "少年ブレイヴ", "DAZE"};
 
-        private static int songIndex;
+        internal static int songIndex;
+        internal static int songCount;
 
         internal static Task StartSongActivityTimer()
         {
@@ -43,7 +44,20 @@ namespace Ene.Core
             return Task.CompletedTask;
         }
 
-        private static string getNameOfSong(int index, bool isNameInJapanese)
+        internal static Task StartAfkTimer()
+        {
+            loopingAfkTimer = new Timer()
+            {
+                Interval = 10 * 60 * 1000,
+                AutoReset = false,
+                Enabled = true
+            };
+            loopingAfkTimer.Elapsed += OnAfkTimerTicked;
+
+            return Task.CompletedTask;
+        }
+
+        internal static string getNameOfSong(int index, bool isNameInJapanese)
         {
             string songName;
             index = getSongIndex();
@@ -59,7 +73,7 @@ namespace Ene.Core
             return songName;
         }
 
-        private static int getSongIndex()
+        internal static int getSongIndex()
         {
             if (songIndex == songNamesEnglish.Length)
             {
@@ -68,12 +82,31 @@ namespace Ene.Core
             return songIndex;
         }
 
+        internal static bool isSongCountEqual()
+        {
+            if (songNamesEnglish.Length == songNamesJapanese.Length)
+            {
+                songCount = (songNamesEnglish.Length + songNamesJapanese.Length) / 2;
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Song lengths are not equal!");
+                return false;
+            }
+        }
+
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)
         {
-            string songName = getNameOfSong(songIndex, false);
+            string songName = getNameOfSong(songIndex, true);
             game = new Game(songName, ActivityType.Listening);
             songIndex++;
             await Global.Client.SetActivityAsync(game);
+        }
+
+        private static async void OnAfkTimerTicked(object sender, ElapsedEventArgs e)
+        {
+            await Global.Client.SetStatusAsync(UserStatus.AFK);
         }
     }
 }

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+
+using Ene.Core;
 using Ene.Modules;
 using AIMLbot;
 
@@ -63,6 +65,8 @@ namespace Ene
 
                     }
                 }
+                await _client.SetStatusAsync(UserStatus.Online);
+                var afkTimer = RepeatingTimer.StartAfkTimer();
             }
 
         }
