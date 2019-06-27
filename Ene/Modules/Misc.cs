@@ -136,14 +136,14 @@ namespace Ene.Modules
 
         [RequireOwner]
         [Command("whisper")]
-        public async Task whisper([Remainder]string msg)
+        public async Task whisper(ulong id, [Remainder]string msg)
         {
             var embed = new EmbedBuilder();
             msg = SubstitutePronouns(msg);
             msg = SubstituteVerbs(msg);
             embed.WithDescription(msg);
             embed.WithColor(mainColor);
-            await Context.Client.GetUser(232345332162363394).SendMessageAsync("", false, embed.Build());
+            await Context.Client.GetUser(id).SendMessageAsync("", false, embed.Build());
         }
 
         internal string SubstitutePronouns(string previousString)
@@ -189,6 +189,32 @@ namespace Ene.Modules
                 words[0] = "";
             }
             return string.Join(" ", words);
+        }
+        [Command("who are you")]
+        public async Task WhoAreYou()
+        {
+            var exampleAuthor = new EmbedAuthorBuilder()
+            .WithName("I am a bot")
+            .WithIconUrl(Context.Client.CurrentUser.GetAvatarUrl());
+            var exampleFooter = new EmbedFooterBuilder()
+                    .WithText("I am a nice footer")
+                    .WithIconUrl("https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png");
+            var exampleField = new EmbedFieldBuilder()
+                    .WithName("Title of Another Field")
+                    .WithValue("I am an [example](https://example.com).")
+                    .WithIsInline(true);
+            var otherField = new EmbedFieldBuilder()
+                    .WithName("Title of a Field")
+                    .WithValue("Notice how I'm inline with that other field next to me.")
+                    .WithIsInline(true);
+            var embed = new EmbedBuilder()
+                    .AddField(exampleField)
+                    .AddField(otherField)
+                    .WithAuthor(exampleAuthor)
+                    .WithFooter(exampleFooter)
+                    .Build();
+
+            await Context.Channel.SendMessageAsync("", false, embed);
         }
 
         [Command("should I")]

@@ -31,14 +31,14 @@ namespace Ene.Modules
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)
             {
-                embed.WithDescription("You need to connect to a voice channel first.");
+                embed.WithDescription("Please join the channel before commanding me.");
                 await ReplyAsync("", false, embed.Build());
                 return;
             }
             else
             {
                 await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                embed.WithDescription(String.Format("Now playing in {0}.", user.VoiceChannel.Name));
+                embed.WithDescription(String.Format("Now joining :loud_sound: {0}.", user.VoiceChannel.Name.ToLower()));
                 await ReplyAsync("", false, embed.Build());
             }
         }
@@ -49,6 +49,7 @@ namespace Ene.Modules
             var embed = new EmbedBuilder();
             embed.WithColor(mainColor);
             var user = Context.User as SocketGuildUser;
+
             if (user.VoiceChannel is null)
             {
                 embed.WithDescription("Please join the channel before commanding me.");
@@ -56,32 +57,45 @@ namespace Ene.Modules
             else
             {
                 await _musicService.LeaveAsync(user.VoiceChannel);
-                embed.WithDescription(String.Format("Goodbye, {0}", Context.User.Username));
+                embed.WithDescription(String.Format("Okay {0}, I will see you later.", Context.User.Username));
             }
             await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("please play")]
+        [Command("play")]
         public async Task Play([Remainder]string query)
         {
-            var result = await _musicService.PlayAsync(query, Context.Guild.Id);
+            var embed = new EmbedBuilder();
+            embed.WithColor(mainColor);
+
+            var user = Context.User as SocketGuildUser;
+            if (user.VoiceChannel is null)
+            {
+                embed.WithDescription("Please join the channel before commanding me.");
+                await ReplyAsync("", false, embed.Build());
+                return;
+            }
+            else
+            {
+                await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
+                var result = await _musicService.PlayAsync(query, Context.Guild.Id);
+                embed.WithDescription(result);
+                embed.WithColor(mainColor);
+                await ReplyAsync("", false, embed.Build());
+            }
+        }
+
+        [Command("stop playing.")]
+        public async Task Stop()
+        {
+            var result = await _musicService.StopAsync();
             var embed = new EmbedBuilder();
             embed.WithDescription(result);
             embed.WithColor(mainColor);
             await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("please stop playing.")]
-        public async Task Stop()
-        {
-            await _musicService.StopAsync();
-            var embed = new EmbedBuilder();
-            embed.WithDescription("Okay, fine. Stopping the music.");
-            embed.WithColor(mainColor);
-            await ReplyAsync("", false, embed.Build());
-        }
-
-        [Command("please skip the song.")]
+        [Command("skip the song.")]
         public async Task Skip()
         {
             var result = await _musicService.SkipAsync();

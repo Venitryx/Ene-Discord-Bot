@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <StartupObject>Ene.Program</StartupObject>
     <ApplicationIcon></ApplicationIcon>
     <Win32Resource />
@@ -28,9 +28,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="XCOPY &quot;$(ProjectDir)aiml&quot; &quot;$(TargetDir)aiml&quot; /E /I /F /Y /D&#xD;&#xA;XCOPY &quot;$(ProjectDir)config&quot; &quot;$(TargetDir)config&quot; /E /I /F /Y /D" />
-  </Target>
 
 </Project>

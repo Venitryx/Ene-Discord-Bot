@@ -27,7 +27,12 @@ namespace Ene
 
         public async Task StartAsync()
         {
-            if (Config.bot.token == "" || Config.bot.token == null) return;
+            if (Config.bot.token == "" || Config.bot.token == null)
+            {
+                Console.WriteLine("Invalid bot token!");
+                return;
+            }
+
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
@@ -55,8 +60,6 @@ namespace Ene
 
             await _services.GetRequiredService<MusicService>().InitializeAsync();
             await Task.Delay(-1); 
-
-
         }
 
         private IServiceProvider SetUpServices()

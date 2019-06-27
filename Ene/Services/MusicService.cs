@@ -42,7 +42,10 @@ namespace Ene.Services
             => await _lavaSocketClient.ConnectAsync(voiceChannel, textChannel);
 
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
-            => await _lavaSocketClient.DisconnectAsync(voiceChannel);
+        {
+            await _lavaSocketClient.DisconnectAsync(voiceChannel);
+            _player = null;
+        }
 
         public async Task<string> PlayAsync(string query, ulong guildId)
         {
@@ -50,20 +53,17 @@ namespace Ene.Services
             var results = await _lavaRestClient.SearchYouTubeAsync(query);
             if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
             {
-                return "No matches found.";
+                return String.Format("Sorry, can't find any songs by {0}.", query);
             }
 
             var track = results.Tracks.FirstOrDefault();
-            RepeatingTimer.loopingSongActivityTimer.Stop();
 
             if (_player.IsPlaying)
-            {
-                Game game = new Game(track.Title, ActivityType.Listening);
-                await Global.Client.SetActivityAsync(game);
-                RepeatingTimer.loopingSongActivityTimer.Stop();
-
+            { 
                 _player.Queue.Enqueue(track);
-                return String.Format("You added {0} to the queue!", track.Title);
+                RepeatingTimer.loopingSongActivityTimer.Stop();
+                return String.Format("{0} has been added to the queue!", track.Title);
+
             }
             else
             {
@@ -76,20 +76,32 @@ namespace Ene.Services
             }
         }
 
-        public async Task StopAsync()
+        public async Task<string> StopAsync()
         {
             if (_player is null)
-                return;
-            await _player.StopAsync();
-            RepeatingTimer.StartSongActivityTimer().Start();
-            RepeatingTimer.pickRandomSongDisplay();
+            {
+                return "Hey, my music function is already stopped!";
+            }
+            else
+            {
+                await _player.StopAsync();
+                _player = null;
+                Game game = RepeatingTimer.pickRandomSongDisplay();
+                await Global.Client.SetActivityAsync(game);
+                RepeatingTimer.loopingSongActivityTimer.Start();
+                return "Okay, fine. Stopping the music.";
+            }
         }
 
         public async Task<string> SkipAsync()
         {
-            if (_player is null || _player.Queue.Items.Count() is 0)
+            if (_player is null)
             {
-                return "Hey, nothing's playing.";
+                return "Hey, nothing is playing.";
+            }
+            if (_player.Queue.Items.Count() is 0)
+            {
+                return "Hey, I can't skip if nothing else is in the playlist.";
             }
 
             var oldTrack = _player.CurrentTrack;
@@ -99,7 +111,7 @@ namespace Ene.Services
             await Global.Client.SetActivityAsync(game);
             RepeatingTimer.loopingSongActivityTimer.Stop();
 
-            return String.Format("Fine. Skipping: {0} \nNow Playing: {1}", oldTrack.Title, _player.CurrentTrack.Title);
+            return String.Format("Fine. Skipping: {0}\n \nNow Playing: {1}", oldTrack.Title, _player.CurrentTrack.Title);
         }
 
         public async Task<string> SetVolumeAsync(int vol)
@@ -124,7 +136,7 @@ namespace Ene.Services
             if (!_player.IsPaused)
             {
                 await _player.PauseAsync();
-                return "Music is Paused.";
+                return "Music is paused.";
             }
             else
             {
@@ -158,19 +170,27 @@ namespace Ene.Services
             if (!reason.ShouldPlayNext())
                 return;
 
+            var embed = new EmbedBuilder();
+            embed.WithColor(mainColor);
+
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
-                var embed = new EmbedBuilder();
                 embed.WithDescription("There are no more songs.");
-                embed.WithColor(mainColor);
 
-                RepeatingTimer.StartSongActivityTimer().Start();
-                RepeatingTimer.pickRandomSongDisplay();
+                Game game = RepeatingTimer.pickRandomSongDisplay();
+                await Global.Client.SetActivityAsync(game);
+                RepeatingTimer.loopingSongActivityTimer.Start();
                 await player.TextChannel.SendMessageAsync("", false, embed.Build());
                 return;
             }
-
-            await player.PlayAsync(nextTrack);
+            else
+            {
+                embed.WithDescription(String.Format("Now Playing: {0}", nextTrack.Title));
+                await player.PlayAsync(nextTrack);
+                Game game = new Game(nextTrack.Title, ActivityType.Listening);
+                await Global.Client.SetActivityAsync(game);
+                await player.TextChannel.SendMessageAsync("", false, embed.Build());
+            }
         }
 
         private Task LogAsync(LogMessage logMessage)

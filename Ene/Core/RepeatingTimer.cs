@@ -15,6 +15,7 @@ namespace Ene.Core
         internal static Timer loopingSongActivityTimer, loopingAfkTimer;
         private static SocketTextChannel channel;
         private static Game game;
+        private static bool isJapanese = false;
 
         internal static string[] songNamesEnglish = { "Jinzou Enemy", "Mekakushi Code", "Kagerou Daze", "Headphone Actor",
             "Souzou Forest", "Konoha's State of the World", "Kisaragi Attention", "Children Record", "Yobanashi Deceive",
@@ -36,6 +37,7 @@ namespace Ene.Core
             loopingSongActivityTimer = new Timer()
             {
                 Interval = 3.5 * 60 * 1000,
+                //Interval = 5 * 1000,
                 AutoReset = true,
                 Enabled = true
             };
@@ -49,6 +51,7 @@ namespace Ene.Core
             loopingAfkTimer = new Timer()
             {
                 Interval = 10 * 60 * 1000,
+                //Interval = 5 * 1000,
                 AutoReset = false,
                 Enabled = true
             };
@@ -75,7 +78,9 @@ namespace Ene.Core
 
         internal static int getSongIndex()
         {
-            if (songIndex == songNamesEnglish.Length)
+            isSongCountEqual();
+            Console.WriteLine(songIndex + " " + songCount);
+            if (songIndex >= songCount)
             {
                 songIndex = 0;
             }
@@ -98,17 +103,17 @@ namespace Ene.Core
 
         internal static Game pickRandomSongDisplay()
         {
-            if (RepeatingTimer.isSongCountEqual())
+            if (isSongCountEqual())
             {
                 Random r = new Random();
-                RepeatingTimer.songIndex = r.Next(0, RepeatingTimer.songCount);
+                songIndex = r.Next(0, songCount);
             }
-            return new Game(RepeatingTimer.getNameOfSong(RepeatingTimer.songIndex, false), ActivityType.Listening);
+            return new Game(getNameOfSong(songIndex, isJapanese), ActivityType.Listening);
         }
 
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)
         {
-            string songName = getNameOfSong(songIndex, true);
+            string songName = getNameOfSong(songIndex, isJapanese);
             game = new Game(songName, ActivityType.Listening);
             songIndex++;
             await Global.Client.SetActivityAsync(game);

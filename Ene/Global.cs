@@ -11,5 +11,6 @@ namespace Ene
     {
         internal static DiscordSocketClient Client { get; set; }
         internal static Game Game { get; set; }
+        internal static SocketGuildUser SocketUser { get; set; }
     }
 }
