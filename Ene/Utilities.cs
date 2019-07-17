@@ -17,13 +17,13 @@ namespace Ene
             messages = data.ToObject<Dictionary<string, string>>();
         }
 
-        public static string GetAlert(string key)
+        public static string GetMessage(string key)
         {
             if (messages.ContainsKey(key)) return messages[key];
             return "";
         }
         
-        public static string GetAlert(string key, params object[] parameter)
+        public static string GetMessage(string key, params object[] parameter)
         {
             if (messages.ContainsKey(key)) return string.Format(messages[key], parameter);
             return "";

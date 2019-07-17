@@ -10,7 +10,7 @@ namespace Ene
     internal static class Global
     {
         internal static DiscordSocketClient Client { get; set; }
-        internal static Game Game { get; set; }
-        internal static SocketGuildUser SocketUser { get; set; }
+        internal static ulong MessageIdToTrack { get; set; }
+        internal static Color mainColor = new Color(103, 163, 227);
     }
 }

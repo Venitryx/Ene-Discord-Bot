@@ -14,8 +14,6 @@ namespace Ene.Modules
     public class Music : ModuleBase<SocketCommandContext>
     {
         private MusicService _musicService;
-        public Color mainColor = new Color(103, 163, 227);
-        String punctuation = "?;";
 
         public Music(MusicService musicService)
         {
@@ -26,7 +24,7 @@ namespace Ene.Modules
         public async Task Join()
         {
             var embed = new EmbedBuilder();
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
 
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)
@@ -47,7 +45,7 @@ namespace Ene.Modules
         public async Task Leave()
         {
             var embed = new EmbedBuilder();
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
             var user = Context.User as SocketGuildUser;
 
             if (user.VoiceChannel is null)
@@ -66,7 +64,7 @@ namespace Ene.Modules
         public async Task Play([Remainder]string query)
         {
             var embed = new EmbedBuilder();
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
 
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)
@@ -80,7 +78,7 @@ namespace Ene.Modules
                 await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
                 var result = await _musicService.PlayAsync(query, Context.Guild.Id);
                 embed.WithDescription(result);
-                embed.WithColor(mainColor);
+                embed.WithColor(Global.mainColor);
                 await ReplyAsync("", false, embed.Build());
             }
         }
@@ -91,7 +89,7 @@ namespace Ene.Modules
             var result = await _musicService.StopAsync();
             var embed = new EmbedBuilder();
             embed.WithDescription(result);
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
             await ReplyAsync("", false, embed.Build());
         }
 
@@ -101,7 +99,7 @@ namespace Ene.Modules
             var result = await _musicService.SkipAsync();
             var embed = new EmbedBuilder();
             embed.WithDescription(result);
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
             await ReplyAsync("", false, embed.Build());
         }
 
@@ -111,7 +109,7 @@ namespace Ene.Modules
             var result = await _musicService.SetVolumeAsync(vol);
             var embed = new EmbedBuilder();
             embed.WithDescription(result);
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
             await ReplyAsync("", false, embed.Build());
         }
 
@@ -121,7 +119,7 @@ namespace Ene.Modules
             var result = await _musicService.PauseOrResumeAsync();
             var embed = new EmbedBuilder();
             embed.WithDescription(result);
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
             await ReplyAsync("", false, embed.Build());
         }
 
@@ -131,7 +129,17 @@ namespace Ene.Modules
             var result = await _musicService.ResumeAsync();
             var embed = new EmbedBuilder();
             embed.WithDescription(result);
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
+            await ReplyAsync("", false, embed.Build());
+        }
+
+        [Command("repeat the song")]
+        public async Task Repeat()
+        {
+            var result = await _musicService.ResumeAsync();
+            var embed = new EmbedBuilder();
+            embed.WithDescription(result);
+            embed.WithColor(Global.mainColor);
             await ReplyAsync("", false, embed.Build());
         }
     }

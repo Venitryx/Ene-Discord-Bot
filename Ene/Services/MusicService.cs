@@ -44,7 +44,6 @@ namespace Ene.Services
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
         {
             await _lavaSocketClient.DisconnectAsync(voiceChannel);
-            _player = null;
         }
 
         public async Task<string> PlayAsync(string query, ulong guildId)
@@ -61,16 +60,11 @@ namespace Ene.Services
             if (_player.IsPlaying)
             { 
                 _player.Queue.Enqueue(track);
-                RepeatingTimer.loopingSongActivityTimer.Stop();
                 return String.Format("{0} has been added to the queue!", track.Title);
 
             }
             else
             {
-                Game game = new Game(track.Title, ActivityType.Listening);
-                await Global.Client.SetActivityAsync(game);
-                RepeatingTimer.loopingSongActivityTimer.Stop();
-
                 await _player.PlayAsync(track);
                 return String.Format("Now Playing: {0}", track.Title);
             }
@@ -85,10 +79,6 @@ namespace Ene.Services
             else
             {
                 await _player.StopAsync();
-                _player = null;
-                Game game = RepeatingTimer.pickRandomSongDisplay();
-                await Global.Client.SetActivityAsync(game);
-                RepeatingTimer.loopingSongActivityTimer.Start();
                 return "Okay, fine. Stopping the music.";
             }
         }
@@ -106,11 +96,6 @@ namespace Ene.Services
 
             var oldTrack = _player.CurrentTrack;
             await _player.SkipAsync();
-
-            Game game = new Game(_player.CurrentTrack.Title, ActivityType.Listening);
-            await Global.Client.SetActivityAsync(game);
-            RepeatingTimer.loopingSongActivityTimer.Stop();
-
             return String.Format("Fine. Skipping: {0}\n \nNow Playing: {1}", oldTrack.Title, _player.CurrentTrack.Title);
         }
 
@@ -159,7 +144,6 @@ namespace Ene.Services
             return "Music is already not paused.";
         }
 
-
         private async Task ClientReadyAsync()
         {
             await _lavaSocketClient.StartAsync(_client);
@@ -176,10 +160,6 @@ namespace Ene.Services
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
                 embed.WithDescription("There are no more songs.");
-
-                Game game = RepeatingTimer.pickRandomSongDisplay();
-                await Global.Client.SetActivityAsync(game);
-                RepeatingTimer.loopingSongActivityTimer.Start();
                 await player.TextChannel.SendMessageAsync("", false, embed.Build());
                 return;
             }
@@ -187,8 +167,6 @@ namespace Ene.Services
             {
                 embed.WithDescription(String.Format("Now Playing: {0}", nextTrack.Title));
                 await player.PlayAsync(nextTrack);
-                Game game = new Game(nextTrack.Title, ActivityType.Listening);
-                await Global.Client.SetActivityAsync(game);
                 await player.TextChannel.SendMessageAsync("", false, embed.Build());
             }
         }

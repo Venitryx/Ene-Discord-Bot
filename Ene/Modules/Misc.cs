@@ -10,10 +10,13 @@ using System.Diagnostics;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Discord.Rest;
 
 using Discord.Audio;
 
 using Ene.Core.UserAccounts;
+using Ene.SystemLang;
+
 using NReco.ImageGenerator;
 using Newtonsoft.Json;
 using CoreHtmlToImage;
@@ -23,16 +26,127 @@ namespace Ene.Modules
 {
     public class Misc : ModuleBase<SocketCommandContext>
     {
-        public Color mainColor = new Color(103, 163, 227);
-        String punctuation = "?;";
-
-        /*[Command("what are my stats?")]
-        public async Task MyStats()
+        [Alias("what are you?")]
+        [Command("who are you?")]
+        public async Task WhoAreYou()
         {
-            var account = UserAccounts.GetAccount(Context.User);
-            await Context.Channel.SendMessageAsync($"You have { account.XP} XP and {account.Points} points.");
+            var author = new EmbedAuthorBuilder()
+            .WithName("Hi, my name's Ene! I'm a super pretty cyber girl!")
+            .WithIconUrl(Context.Client.CurrentUser.GetAvatarUrl());
+            var fieldAge = new EmbedFieldBuilder()
+                    .WithName("Age:")
+                    .WithValue("19")
+                    .WithIsInline(true);
+            var fieldBirthday = new EmbedFieldBuilder()
+                    .WithName("Birthday:")
+                    .WithValue("Unknown")
+                    .WithIsInline(true);
+            var fieldHeight = new EmbedFieldBuilder()
+                    .WithName("Height:")
+                    .WithValue("157cm")
+                    .WithIsInline(true);
+            var fieldGender = new EmbedFieldBuilder()
+                    .WithName("Gender:")
+                    .WithValue("F")
+                    .WithIsInline(true);
+            var fieldBloodtype = new EmbedFieldBuilder()
+                    .WithName("Bloodtype:")
+                    .WithValue("AB")
+                    .WithIsInline(true);
+            var fieldFavoriteColor = new EmbedFieldBuilder()
+                    .WithName("Favorite Color:")
+                    .WithValue("Blue")
+                    .WithIsInline(true);
+            var fieldSpecialPowers = new EmbedFieldBuilder()
+                    .WithName("Abilities:")
+                    .WithValue("Opening Eyes")
+                    .WithIsInline(true);
+            var fieldOccupations = new EmbedFieldBuilder()
+                    .WithName("Occupations:")
+                    .WithValue("Cybergirl\n6th member of the Mekakushi-dan")
+                    .WithIsInline(true);
+            var fieldOrigin = new EmbedFieldBuilder()
+                    .WithName("Origin:")
+                    .WithValue("[Kagerou Project](https://kagerouproject.fandom.com/wiki/Kagerou_Project)")
+                    .WithIsInline(true);
+            var embed = new EmbedBuilder()
+                    .AddField(fieldAge)
+                    .AddField(fieldBirthday)
+                    .AddField(fieldHeight)
+                    .AddField(fieldGender)
+                    .AddField(fieldBloodtype)
+                    .AddField(fieldFavoriteColor)
+                    .AddField(fieldSpecialPowers)
+                    .AddField(fieldOccupations)
+                    .AddField(fieldOrigin)
+                    .WithAuthor(author)
+                    .WithColor(Global.mainColor)
+                    .Build();
+
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync("", false, embed);
         }
-        */
+
+        [Command("what can you do?")]
+        public async Task GetCommands()
+        {
+            var author = new EmbedAuthorBuilder()
+            .WithName("Here's a list of things I can do.")
+            .WithIconUrl(Context.Client.CurrentUser.GetAvatarUrl());
+            var fieldMusic = new EmbedFieldBuilder()
+                    .WithName("I can play music!")
+                    .WithValue($"Commands:" +
+                    $"\n{Config.bot.cmdPrefix}join the channel." +
+                    $"\n{Config.bot.cmdPrefix}play <youtube link or search>" +
+                    $"\n{Config.bot.cmdPrefix}stop playing." +
+                    $"\n{Config.bot.cmdPrefix}skip the song." +
+                    $"\n{Config.bot.cmdPrefix}stop playing." +
+                    $"\n{Config.bot.cmdPrefix}leave the channel.")
+                    .WithIsInline(true);
+            var fieldMisc = new EmbedFieldBuilder()
+                    .WithName("I can perform other various fun tasks!")
+                    .WithValue($"Commands:" +
+                    $"\n{Config.bot.cmdPrefix}should I <insert action(s) here>?" +
+                    $"\n{Config.bot.cmdPrefix}say <message I should type to the channel>")
+                    .WithIsInline(false);
+            var embed = new EmbedBuilder()
+                    .AddField(fieldMusic)
+                    .AddField(fieldMisc)
+                    .WithAuthor(author)
+                    .WithDescription("If you need help, just call me by saying \"Ene, what can you do?\"")
+                    .WithColor(Global.mainColor)
+                    .Build();
+
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync("", false, embed);
+        }
+
+        [RequireOwner]
+        [Command("react")]
+        public async Task HandleReaction()
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            RestUserMessage msg = await Context.Channel.SendMessageAsync("React with ✅ or ❎!");
+            Global.MessageIdToTrack = msg.Id;
+        }
+
+        [RequireOwner]
+        [Command("leave all servers.")]
+        public async Task LeaveAllServers()
+        {
+            foreach (var guild in Context.Client.Guilds)
+            {
+                if(guild.Id != 446409245571678208 || guild.Id != 555496686601109534)
+                {
+                    Context.Channel.SendMessageAsync("Leaving: " + guild.Name);
+                    await guild.LeaveAsync();
+
+                }
+            }
+        }
 
         [Command("get random person.")]
         public async Task GetRandomPerson()
@@ -55,8 +169,114 @@ namespace Ene.Modules
             embed.WithThumbnailUrl(picture);
             embed.WithTitle("Found a random person:");
             embed.WithDescription(firstName + " " + lastName);
-            embed.WithColor(mainColor);
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [RequireUserPermission(GuildPermission.ManageMessages)]
+        [Command("say")]
+        public async Task Say([Remainder]string msg)
+        {
+            var embed = new EmbedBuilder();
+            var authorEmbed = new EmbedAuthorBuilder()
+                .WithName(String.Format("{0}#{1} said:", Context.User.Username, Context.User.Discriminator))
+                .WithIconUrl(Context.User.GetAvatarUrl());
+
+            embed.WithDescription(msg);
+            embed.WithAuthor(authorEmbed);
+            embed.WithColor(Global.mainColor);
+            await Context.Message.DeleteAsync();
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [RequireOwner]
+        [Command("secretly say")]
+        public async Task SecretSay([Remainder]string msg)
+        {
+            var embed = new EmbedBuilder();
+          
+            embed.WithDescription(msg);
+            embed.WithColor(Global.mainColor);
+            await Context.Message.DeleteAsync();
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [RequireOwner]
+        [Command("whisper")]
+        public async Task Whisper(ulong id, [Remainder]string msg)
+        {
+            var embed = new EmbedBuilder();
+            embed.WithDescription(msg);
+            embed.WithColor(Global.mainColor);
+            await Context.Client.GetUser(id).SendMessageAsync("", false, embed.Build());
+        }
+
+        [RequireOwner]
+        [Command("broadcast")]
+        public async Task Broadcast(ulong guildID, ulong channelID, [Remainder]string msg)
+        {
+            var embed = new EmbedBuilder();
+            embed.WithDescription(msg);
+            embed.WithColor(Global.mainColor);
+            await Context.Client.GetGuild(guildID).GetTextChannel(channelID).TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Client.GetGuild(guildID).GetTextChannel(channelID).SendMessageAsync("", false, embed.Build());
+        }
+
+        [Command("should I")]
+        public async Task Pick([Remainder]string msg)
+        {
+            string[] options = msg.Split(new String[] {","}, StringSplitOptions.RemoveEmptyEntries);
+
+            if (options.Length is 1)
+            {
+                var replies = new List<string>();
+
+                replies.Add("Yes, you should.");
+                replies.Add("No, you shouldn't.");
+                replies.Add("You totally should.");
+                replies.Add("You definitely shouldn't.");
+                replies.Add("Maybe.");
+                replies.Add("I'm not sure.");
+                replies.Add("I don't know.");
+                replies.Add("How should I know?");
+
+                Random r = new Random();
+                var answer = replies[r.Next(replies.Count - 1)];
+
+                var embed = new EmbedBuilder();
+                embed.WithDescription(answer);
+                embed.WithColor(Global.mainColor);
+                await Context.Channel.TriggerTypingAsync();
+                await Task.Delay(5000);
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
+            }
+            else
+            {
+                for (int i = 0; i < options.Length; i++)
+                {
+                    options[i] = StringManipulation.RemoveFanboys(options[i]);
+                    options[i] = StringManipulation.StripPunctuation(options[i]);
+                    options[i] = StringManipulation.StripSymbols(options[i]);
+                    options[i] += '.';
+                }
+
+                Random r = new Random();
+                string selection = options[r.Next(0, options.Length)];
+
+                var embed = new EmbedBuilder();
+                embed.WithDescription("You should " + selection);
+                embed.WithColor(Global.mainColor);
+                await Context.Channel.TriggerTypingAsync();
+                await Task.Delay(5000);
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
+            }
         }
 
         /*
@@ -89,6 +309,14 @@ namespace Ene.Modules
         }
         */
 
+        /*[Command("what are my stats?")]
+        public async Task MyStats()
+        {
+            var account = UserAccounts.GetAccount(Context.User);
+            await Context.Channel.SendMessageAsync($"You have { account.XP} XP and {account.Points} points.");
+        }
+        */
+
         /*
         [Command("get stats")]
         public async Task GetStats([Remainder] string arg = "")
@@ -113,172 +341,6 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync($"You gained {xp} XP.");
         }
         */
-
-        [Command("say")]
-        public async Task Say([Remainder]string msg)
-        {
-            var embed = new EmbedBuilder();
-            embed.WithDescription(msg);
-            embed.WithColor(mainColor);
-            await Context.Channel.SendMessageAsync("", false, embed.Build());
-        }
-
-        [RequireOwner]
-        [Command("say and delete")]
-        public async Task SecretSay([Remainder]string msg)
-        {
-            var embed = new EmbedBuilder();
-            embed.WithDescription(msg);
-            embed.WithColor(mainColor);
-            await Context.Message.DeleteAsync();
-            await Context.Channel.SendMessageAsync("", false, embed.Build());
-        }
-
-        [RequireOwner]
-        [Command("whisper")]
-        public async Task whisper(ulong id, [Remainder]string msg)
-        {
-            var embed = new EmbedBuilder();
-            msg = SubstitutePronouns(msg);
-            msg = SubstituteVerbs(msg);
-            embed.WithDescription(msg);
-            embed.WithColor(mainColor);
-            await Context.Client.GetUser(id).SendMessageAsync("", false, embed.Build());
-        }
-
-        internal string SubstitutePronouns(string previousString)
-        {
-            string[] words = previousString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
-            {
-                if (words[i].Equals("I"))
-                    words[i] = words[i].Replace("I", "you");
-                else if (words[i].Equals("me"))
-                    words[i] = words[i].Replace("me", "you");
-                else if (words[i].Equals("my"))
-                    words[i] = words[i].Replace("my", "your");
-                else if (words[i].Equals("our"))
-                    words[i] = words[i].Replace("our", "your");
-                else if (words[i].Equals("mine"))
-                    words[i] = words[i].Replace("mine", "yours");
-                else if (words[i].Equals("ours"))
-                    words[i] = words[i].Replace("ours", "yours");
-            }
-            return string.Join(" ", words);
-        }
-
-        internal string SubstituteVerbs(string previousString)
-        {
-            string[] words = previousString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
-            {
-                if (words[i].Equals("am"))
-                    words[i] = words[i].Replace("am", "are");
-                else if (words[i].Equals("are"))
-                    words[i] = words[i].Replace("are", "am");
-            }
-            return string.Join(" ", words);
-        }
-
-        internal string RemoveFanboys(string previousString)
-        {
-            string[] words = previousString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if(words[0].Equals("for") || words[0].Equals("and") || words[0].Equals("nor") || words[0].Equals("but")
-                || words[0].Equals("or") || words[0].Equals("yet") || words[0].Equals("so"))
-            {
-                words[0] = "";
-            }
-            return string.Join(" ", words);
-        }
-        [Command("who are you")]
-        public async Task WhoAreYou()
-        {
-            var exampleAuthor = new EmbedAuthorBuilder()
-            .WithName("I am a bot")
-            .WithIconUrl(Context.Client.CurrentUser.GetAvatarUrl());
-            var exampleFooter = new EmbedFooterBuilder()
-                    .WithText("I am a nice footer")
-                    .WithIconUrl("https://discordapp.com/assets/28174a34e77bb5e5310ced9f95cb480b.png");
-            var exampleField = new EmbedFieldBuilder()
-                    .WithName("Title of Another Field")
-                    .WithValue("I am an [example](https://example.com).")
-                    .WithIsInline(true);
-            var otherField = new EmbedFieldBuilder()
-                    .WithName("Title of a Field")
-                    .WithValue("Notice how I'm inline with that other field next to me.")
-                    .WithIsInline(true);
-            var embed = new EmbedBuilder()
-                    .AddField(exampleField)
-                    .AddField(otherField)
-                    .WithAuthor(exampleAuthor)
-                    .WithFooter(exampleFooter)
-                    .Build();
-
-            await Context.Channel.SendMessageAsync("", false, embed);
-        }
-
-        [Command("should I")]
-        public async Task Pick([Remainder]string msg)
-        {
-            string[] options = msg.Split(new String[] {","}, StringSplitOptions.RemoveEmptyEntries);
-
-            if (options.Length is 1)
-            {
-                var replies = new List<string>();
-
-                replies.Add("Yes, you should.");
-                replies.Add("No, you shouldn't.");
-                replies.Add("You totally should.");
-                replies.Add("You definitely shouldn't.");
-                replies.Add("Maybe.");
-                replies.Add("I'm not sure.");
-                replies.Add("I don't know.");
-                replies.Add("How should I know?");
-
-                Random r = new Random();
-                var answer = replies[r.Next(replies.Count - 1)];
-
-                var embed = new EmbedBuilder();
-                embed.WithDescription(answer);
-                embed.WithColor(mainColor);
-                await Context.Channel.SendMessageAsync("", false, embed.Build());
-            }
-            else
-            {
-                for (int i = 0; i < options.Length; i++)
-                {
-                    string newString;
-                    options[i] = RemoveFanboys(options[i]);
-
-                    string punctuationString = options[i].Substring(options[i].Length - 1);
-                    if (punctuation.Contains(punctuationString))
-                    {
-                        newString = options[i].Substring(0, options[i].Length - 1);
-                        newString = SubstitutePronouns(newString);
-                        newString = SubstituteVerbs(newString);
-                        punctuationString = punctuationString.Replace('?', '.');
-                        punctuationString = punctuationString.Replace(';', '.');
-                        newString += punctuationString;
-                    }
-                    else
-                    {
-                        newString = options[i];
-                        newString = SubstitutePronouns(newString);
-                        newString = SubstituteVerbs(newString);
-                        newString += ".";
-                    }
-                    options[i] = newString;
-                }
-
-                Random r = new Random();
-                string selection = options[r.Next(0, options.Length)];
-
-                var embed = new EmbedBuilder();
-                embed.WithDescription("You should " + selection);
-                embed.WithColor(mainColor);
-                await Context.Channel.SendMessageAsync("", false, embed.Build());
-            }
-        }
 
         /*
         [Command("help please.")]

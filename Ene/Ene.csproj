@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="AIMLBot" Version="2.0.0" />
+    <PackageReference Include="BotSharp.Core" Version="0.4.0" />
     <PackageReference Include="CoreHtmlToImage" Version="1.0.5" />
     <PackageReference Include="Discord.Net" Version="2.1.1" />
     <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />

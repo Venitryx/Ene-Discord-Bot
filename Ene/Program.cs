@@ -49,17 +49,34 @@ namespace Ene
             _client.Log += Log;
             _client.Ready += RepeatingTimer.StartSongActivityTimer;
             _client.Ready += RepeatingTimer.StartAfkTimer;
+            _client.ReactionAdded += OnReactionAdded;
             await _client.LoginAsync(TokenType.Bot, Config.bot.token);
             await _client.StartAsync();
             _services = SetUpServices();
             Global.Client = _client;
-            Game game = RepeatingTimer.pickRandomSongDisplay();
+            Game game = SongDisplay.pickRandomSongDisplay();
             await Global.Client.SetActivityAsync(game);
-            var cmdHandler = new CommandHandler(_client, _cmdService, _services);
+            await Global.Client.SetStatusAsync(UserStatus.Online);
+            var cmdHandler = new CommandHandler(_client, _cmdService, _services);         
             await cmdHandler.InitializeAsync();
 
             await _services.GetRequiredService<MusicService>().InitializeAsync();
             await Task.Delay(-1); 
+        }
+
+        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction)
+        {
+            if(reaction.MessageId == Global.MessageIdToTrack)
+            {
+                if(reaction.Emote.Name == "✅")
+                {
+                    await channel.SendMessageAsync(reaction.User.Value.Username + " reacted with :white_check_mark:.");
+                }
+                if (reaction.Emote.Name == "❎")
+                {
+                    await channel.SendMessageAsync(reaction.User.Value.Username + " reacted with :negative_squared_cross_mark:");
+                }
+            }
         }
 
         private IServiceProvider SetUpServices()
