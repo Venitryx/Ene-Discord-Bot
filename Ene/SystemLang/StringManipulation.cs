@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Linq;
+
+using Discord;
+using Discord.WebSocket;
 
 namespace Ene.SystemLang
 {
@@ -62,6 +66,27 @@ namespace Ene.SystemLang
                 words[0] = "";
             }
             return string.Join(" ", words);
+        }
+
+        private static bool isBotOwner(SocketUser user)
+        {
+            if (user.Id.Equals(229360837318410241)) return true;
+            else return false;
+        }
+        internal static string AddMasterSuffix(string previousString)
+        {
+            if (isBotOwner(Global.context.User))
+            {
+                string lastChar = previousString.Substring(previousString.Length - 1);
+                string newString = previousString.Substring(0, previousString.Length - 1);
+                newString += (", master" + lastChar);
+                return newString;
+            }
+            else return previousString;
+        }
+        internal static int milisecondsToDelayPerCharacter(string previousString)
+        {
+            return previousString.Length * 12;
         }
     }
 }

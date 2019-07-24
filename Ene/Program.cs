@@ -11,6 +11,8 @@ using AIMLbot;
 
 using Ene.Core;
 using Ene.Services;
+using Ene.SystemLang.MiscCommands.AreYouCommand;
+using Ene.SystemLang.MiscCommands.DoYouLikeCommand;
 
 using Victoria;
 
@@ -51,6 +53,8 @@ namespace Ene
             _client.Ready += RepeatingTimer.StartAfkTimer;
             _client.ReactionAdded += OnReactionAdded;
             await _client.LoginAsync(TokenType.Bot, Config.bot.token);
+
+            EmotesStorage.SaveData();
             await _client.StartAsync();
             _services = SetUpServices();
             Global.Client = _client;

@@ -16,6 +16,8 @@ using Discord.Audio;
 
 using Ene.Core.UserAccounts;
 using Ene.SystemLang;
+using Ene.SystemLang.MiscCommands.AreYouCommand;
+using Ene.SystemLang.MiscCommands.DoYouLikeCommand;
 
 using NReco.ImageGenerator;
 using Newtonsoft.Json;
@@ -26,8 +28,8 @@ namespace Ene.Modules
 {
     public class Misc : ModuleBase<SocketCommandContext>
     {
-        [Alias("what are you?")]
-        [Command("who are you?")]
+        [Alias("who are you?", "what are you", "what are you?")]
+        [Command("who are you")]
         public async Task WhoAreYou()
         {
             var author = new EmbedAuthorBuilder()
@@ -83,12 +85,11 @@ namespace Ene.Modules
                     .WithColor(Global.mainColor)
                     .Build();
 
-            await Context.Channel.TriggerTypingAsync();
-            await Task.Delay(5000);
             await Context.Channel.SendMessageAsync("", false, embed);
         }
 
-        [Command("what can you do?")]
+        [Alias("what can you do?")]
+        [Command("what can you do")]
         public async Task GetCommands()
         {
             var author = new EmbedAuthorBuilder()
@@ -118,8 +119,6 @@ namespace Ene.Modules
                     .WithColor(Global.mainColor)
                     .Build();
 
-            await Context.Channel.TriggerTypingAsync();
-            await Task.Delay(5000);
             await Context.Channel.SendMessageAsync("", false, embed);
         }
 
@@ -134,21 +133,24 @@ namespace Ene.Modules
         }
 
         [RequireOwner]
-        [Command("leave all servers.")]
+        [Alias("leave all servers.")]
+        [Command("leave all servers")]
         public async Task LeaveAllServers()
         {
             foreach (var guild in Context.Client.Guilds)
             {
                 if(guild.Id != 446409245571678208 || guild.Id != 555496686601109534)
                 {
-                    Context.Channel.SendMessageAsync("Leaving: " + guild.Name);
+                    await Context.Channel.SendMessageAsync("Leaving: " + guild.Name);
                     await guild.LeaveAsync();
 
                 }
             }
+            await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix("All done!"));
         }
 
-        [Command("get random person.")]
+        [Alias("get random person.", "get a random person", "get a random person.")]
+        [Command("get random person")]
         public async Task GetRandomPerson()
         {
             string json;
@@ -171,7 +173,7 @@ namespace Ene.Modules
             embed.WithDescription(firstName + " " + lastName);
             embed.WithColor(Global.mainColor);
             await Context.Channel.TriggerTypingAsync();
-            await Task.Delay(5000);
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(embed.Description));
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
@@ -189,7 +191,7 @@ namespace Ene.Modules
             embed.WithColor(Global.mainColor);
             await Context.Message.DeleteAsync();
             await Context.Channel.TriggerTypingAsync();
-            await Task.Delay(5000);
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(msg));
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
@@ -203,7 +205,7 @@ namespace Ene.Modules
             embed.WithColor(Global.mainColor);
             await Context.Message.DeleteAsync();
             await Context.Channel.TriggerTypingAsync();
-            await Task.Delay(5000);
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(msg));
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
@@ -229,8 +231,66 @@ namespace Ene.Modules
             await Context.Client.GetGuild(guildID).GetTextChannel(channelID).SendMessageAsync("", false, embed.Build());
         }
 
+        [Command("are you")]
+        public async Task AskAreYou(string emote)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync("OwO.");
+        }
+
+        [Command("add like")]
+        public async Task AddLike(string name, double value, bool useSpecialMessage = false, [Remainder]string specialMessage = null)
+        {
+            var likedObject = Likes.GetLikedObject(objectName: name, value, useSpecialMessage, specialMessage);
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync(string.Format("Added {0} with value of {1}", name, value));
+        }
+        
+        [Alias("you like")]
+        [Command("do you like")]
+        public async Task AskDoYouLike(string objectName)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(Likes.GetMessage(objectName)));
+            await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix(Likes.GetMessage(objectName)));
+        }
+
+        [Command("how much do you like")]
+        public async Task AskHowMuchDoYouLike(string objectName)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(5000);
+            await Context.Channel.SendMessageAsync(Likes.GetLikability(objectName));
+        }
+
+        [Command("get stats")]
+        public async Task GetStats([Remainder] string arg = "")
+        {
+            SocketUser target = null;
+            var mentionedUser = Context.Message.MentionedUsers.FirstOrDefault();
+            target = mentionedUser ?? Context.User;
+
+            var account = UserAccounts.GetAccount(target);
+            await Context.Channel.SendMessageAsync($"{target.Username} has { account.XP} XP and {account.Points} points.");
+        }
+
+        [Command("addXP")]
+        public async Task AddXP(uint xp, [Remainder] string arg = "")
+        {
+            SocketUser target = null;
+            var mentionedUser = Context.Message.MentionedUsers.FirstOrDefault();
+            target = mentionedUser ?? Context.User;
+
+            var account = UserAccounts.GetAccount(target);
+            account.XP += xp;
+            UserAccounts.SaveAccounts();
+            await Context.Channel.SendMessageAsync($"{target.Username} gained {xp} XP.");
+        }
+
         [Command("should I")]
-        public async Task Pick([Remainder]string msg)
+        public async Task AskShouldUser([Remainder]string msg)
         {
             string[] options = msg.Split(new String[] {","}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -248,13 +308,13 @@ namespace Ene.Modules
                 replies.Add("How should I know?");
 
                 Random r = new Random();
-                var answer = replies[r.Next(replies.Count - 1)];
+                var answer = replies[r.Next(replies.Count)];
 
                 var embed = new EmbedBuilder();
-                embed.WithDescription(answer);
+                embed.WithDescription(StringManipulation.AddMasterSuffix(answer));
                 embed.WithColor(Global.mainColor);
                 await Context.Channel.TriggerTypingAsync();
-                await Task.Delay(5000);
+                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(answer));
                 await Context.Channel.SendMessageAsync("", false, embed.Build());
             }
             else
@@ -268,15 +328,53 @@ namespace Ene.Modules
                 }
 
                 Random r = new Random();
-                string selection = options[r.Next(0, options.Length)];
+                string selection = options[r.Next(options.Length)];
 
                 var embed = new EmbedBuilder();
-                embed.WithDescription("You should " + selection);
+                embed.WithDescription(StringManipulation.AddMasterSuffix("You should " + selection));
                 embed.WithColor(Global.mainColor);
                 await Context.Channel.TriggerTypingAsync();
-                await Task.Delay(5000);
+                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(selection));
                 await Context.Channel.SendMessageAsync("", false, embed.Build());
             }
+        }
+        [Alias("what are my stats?")]
+        [Command("what are my stats")]
+        public async Task MyStats()
+        {
+            var account = UserAccounts.GetAccount(Context.User);
+            await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix($"You have {account.XP} XP and {account.Points} points."));
+        }
+      
+        [Command("help please.")]
+        public async Task ShowCommands([Remainder]string arg = "")
+        {
+            if (!UserIsDeveloper((SocketGuildUser)Context.User))
+            {
+                await Context.Channel.SendMessageAsync(":x: You need the Developer role to do that. " + Context.User.Mention);
+                return;
+            }
+            var dmChannel = await Context.User.GetOrCreateDMChannelAsync();
+            await dmChannel.SendMessageAsync(Utilities.GetMessage("help"));
+        }
+
+        private bool UserIsDeveloper(SocketGuildUser user)
+        {
+            ulong targetRoleID = 588857834155016193;
+            var result = from r in user.Guild.Roles
+                         where r.Id == targetRoleID
+                         select r.Id;
+            ulong roleID = result.FirstOrDefault();
+            if (roleID == 0) return false;
+            var targetRole = user.Guild.GetRole(roleID);
+            return user.Roles.Contains(targetRole);
+        }
+
+        [Command("get data count.")]
+        public async Task GetData()
+        {
+            await Context.Channel.SendMessageAsync("Data has " + DataStorage.GetPairsCount() + " pairs.");
+            DataStorage.AddPairToStorage("Count" + DataStorage.GetPairsCount() + " " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString(), "TheCount" + DataStorage.GetPairsCount());
         }
 
         /*
@@ -306,72 +404,6 @@ namespace Ene.Modules
             //var pngBytes = converter.GenerateImage(css + html, NReco.ImageGenerator.ImageFormat.Png);
             //await Context.Channel.SendFileAsync(new MemoryStream(pngBytes), "Ene.png");
             
-        }
-        */
-
-        /*[Command("what are my stats?")]
-        public async Task MyStats()
-        {
-            var account = UserAccounts.GetAccount(Context.User);
-            await Context.Channel.SendMessageAsync($"You have { account.XP} XP and {account.Points} points.");
-        }
-        */
-
-        /*
-        [Command("get stats")]
-        public async Task GetStats([Remainder] string arg = "")
-        {
-            SocketUser target = null;
-            var mentionedUser = Context.Message.MentionedUsers.FirstOrDefault();
-            target = mentionedUser ?? Context.User;
-
-            var account = UserAccounts.GetAccount(target);
-            await Context.Channel.SendMessageAsync($"{target.Username} has { account.XP} XP and {account.Points} points.");
-        }
-        [Command("addXP")]
-        public async Task AddXP(uint xp, [Remainder] string arg = "")
-        {
-            SocketUser target = null;
-            var mentionedUser = Context.Message.MentionedUsers.FirstOrDefault();
-            target = mentionedUser ?? Context.User;
-
-            var account = UserAccounts.GetAccount(target);
-            account.XP += xp;
-            UserAccounts.SaveAccounts();
-            await Context.Channel.SendMessageAsync($"You gained {xp} XP.");
-        }
-        */
-
-        /*
-        [Command("help please.")]
-        public async Task ShowCommands([Remainder]string arg = "")
-        {
-            if (!UserIsDeveloper((SocketGuildUser)Context.User))
-            {
-                await Context.Channel.SendMessageAsync(":x: You need the Developer role to do that. " + Context.User.Mention);
-                return;
-            }
-            var dmChannel = await Context.User.GetOrCreateDMChannelAsync();
-            await dmChannel.SendMessageAsync(Utilities.GetAlert("help"));
-        }
-
-        private bool UserIsDeveloper(SocketGuildUser user)
-        {
-            string targetRoleName = "Developer";
-            var result = from r in user.Guild.Roles
-                         where r.Name == targetRoleName
-                         select r.Id;
-            ulong roleID = result.FirstOrDefault();
-            if (roleID == 0) return false;
-            var targetRole = user.Guild.GetRole(roleID);
-            return user.Roles.Contains(targetRole);
-        }
-
-        [Command("get data count.")]
-        public async Task GetData()
-        {
-            await Context.Channel.SendMessageAsync("Data has " + DataStorage.GetPairsCount() + " pairs.");
-            DataStorage.AddPairToStorage("Count" + DataStorage.GetPairsCount() + " " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString(), "TheCount" + DataStorage.GetPairsCount());
         }
         */
     }

@@ -15,6 +15,8 @@ namespace Ene.Core.UserAccounts
             get
             {
                 //XP = LVL ^ 2 * 50
+                //xp / 50 = lvl^2
+                //sqrt(XP/50) = lvl
                 return (uint)Math.Sqrt(XP / 50);
             }
         }

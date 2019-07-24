@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 
 using Ene.Core;
+using Ene.SystemLang;
 using Ene.Modules;
 using AIMLbot;
 
@@ -41,6 +42,7 @@ namespace Ene
             if (msg == null) return;
 
             var context = new SocketCommandContext(_client, msg);
+            Global.context = context;
             int argPos = 0;
             if (msg.HasStringPrefix(Config.bot.cmdPrefix, ref argPos)
                 || msg.HasMentionPrefix(_client.CurrentUser, ref argPos))
@@ -69,13 +71,16 @@ namespace Ene
                             replies.Add("I can't understand. Maybe try something else?");
 
                             Random r = new Random();
-                            var answer = replies[r.Next(replies.Count - 1)];
+                            var answer = replies[r.Next(replies.Count)];
 
-                            embed.WithDescription(answer);
+                            embed.WithDescription(StringManipulation.AddMasterSuffix(answer));
                             embed.WithColor(Global.mainColor);
+                            await context.Channel.TriggerTypingAsync();
+                            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(answer));
                             await context.Channel.SendMessageAsync("", false, embed.Build());
                             break;
                         case CommandError.Exception:
+                            await context.Channel.SendMessageAsync($"Something went wrong: ({result.ErrorReason})");
                             break;
                         default:
                             await context.Channel.SendMessageAsync($"Something went wrong: ({result.ErrorReason})");
@@ -83,7 +88,7 @@ namespace Ene
                     }
                 }
                 await _client.SetStatusAsync(UserStatus.Online);
-                var afkTimer = RepeatingTimer.StartAfkTimer();
+                await RepeatingTimer.StartAfkTimer();
             }
         }
         private Task LogAsync(LogMessage logMessage)
