@@ -17,12 +17,14 @@ using Discord.Audio;
 using Ene.Core.UserAccounts;
 using Ene.SystemLang;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
-using Ene.SystemLang.MiscCommands.DoYouLikeCommand;
+using Ene.SystemLang.MiscCommands.LikeCommands;
 
+using RedditSharp;
 using NReco.ImageGenerator;
 using Newtonsoft.Json;
 using CoreHtmlToImage;
 using AIMLbot;
+using static RedditSharp.Things.VotableThing;
 
 namespace Ene.Modules
 {
@@ -177,8 +179,120 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
-        [RequireUserPermission(GuildPermission.ManageMessages)]
-        [Command("say")]
+        [Command("get subreddit:")]
+        public async Task GetSubreddit(string type, string sub = "/r/animemes")
+        {
+            var reddit = new Reddit();
+            var user = reddit.LogIn(Config.bot.redditUsername, Config.bot.redditPassword);
+            var subreddit = reddit.GetSubreddit(sub);
+            subreddit.Subscribe();
+
+            type = StringManipulation.StripPunctuation(type);
+            type = StringManipulation.StripSymbols(type);
+
+            switch(type)
+            {
+                case "hot":
+                    foreach (var post in subreddit.Hot.Take(5))
+                    {
+                        var embed = new EmbedBuilder();
+                        try
+                        {
+                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                        }
+                        catch(InvalidOperationException)
+                        {
+
+                        }
+                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithTitle(post.Title);
+                        embed.WithDescription(post.Url.AbsoluteUri);
+                        embed.WithTimestamp(post.CreatedUTC);
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                    }
+                    break;
+                case "new":
+                    foreach (var post in subreddit.New.Take(5))
+                    {
+                        var embed = new EmbedBuilder();
+                        try
+                        {
+                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                        }
+                        catch (InvalidOperationException)
+                        {
+
+                        }
+                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithTitle(post.Title);
+                        embed.WithDescription(post.Url.AbsoluteUri);
+                        embed.WithTimestamp(post.CreatedUTC);
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                    }
+                    break;
+                case "controversial":
+                    foreach (var post in subreddit.Controversial.Take(5))
+                    {
+                        var embed = new EmbedBuilder();
+                        try
+                        {
+                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                        }
+                        catch (InvalidOperationException)
+                        {
+
+                        }
+                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithTitle(post.Title);
+                        embed.WithDescription(post.Url.AbsoluteUri);
+                        embed.WithTimestamp(post.CreatedUTC);
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                    }
+                    break;
+                case "rising":
+                    foreach (var post in subreddit.Rising.Take(5))
+                    {
+                        var embed = new EmbedBuilder();
+                        try
+                        {
+                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                        }
+                        catch (InvalidOperationException)
+                        {
+
+                        }
+                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithTitle(post.Title);
+                        embed.WithDescription(post.Url.AbsoluteUri);
+                        embed.WithTimestamp(post.CreatedUTC);
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                    }
+                    break;
+                default:
+                    var defaultEmbed = new EmbedBuilder();
+                    defaultEmbed.WithDescription("Invalid type! I can do types that are \"hot\",\"new\",\"controversial\", or \"rising.\"");
+                    defaultEmbed.WithColor(Global.mainColor);
+                    await Context.Channel.SendMessageAsync("", false, defaultEmbed.Build());
+                    break;
+            }
+            foreach (var post in subreddit.New.Take(5))
+            {
+                if (post.Title == "What is my karma?")
+                {
+                    // Note: This is an example. Bots are not permitted to cast votes automatically.
+                    post.Upvote();
+                    var comment = post.Comment(string.Format("You have {0} link karma!", post.Author.LinkKarma));
+                    comment.Distinguish(DistinguishType.Moderator);
+                }
+            }
+        }
+
+        [RequireUserPermission(GuildPermission.SendMessages)]
+        [Command("say:")]
         public async Task Say([Remainder]string msg)
         {
             var embed = new EmbedBuilder();
@@ -195,8 +309,8 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
-        [RequireOwner]
-        [Command("secretly say")]
+        [RequireUserPermission(GuildPermission.ManageMessages)]
+        [Command("secretly say: ")]
         public async Task SecretSay([Remainder]string msg)
         {
             var embed = new EmbedBuilder();
@@ -248,13 +362,10 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync(string.Format("Added {0} with value of {1}", name, value));
         }
         
-        [Alias("you like")]
         [Command("do you like")]
         public async Task AskDoYouLike(string objectName)
         {
-            await Context.Channel.TriggerTypingAsync();
-            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(Likes.GetMessage(objectName)));
-            await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix(Likes.GetMessage(objectName)));
+            await SendIndividualMessages(StringManipulation.SplitIntoIndividualMessages(Likes.GetMessage(objectName)), true);
         }
 
         [Command("how much do you like")]
@@ -262,7 +373,7 @@ namespace Ene.Modules
         {
             await Context.Channel.TriggerTypingAsync();
             await Task.Delay(5000);
-            await Context.Channel.SendMessageAsync(Likes.GetLikability(objectName));
+            await Context.Channel.SendMessageAsync(String.Format("On a scale of 1 to 10: I give it a {0}.", Likes.GetLikability(objectName)));
         }
 
         [Command("get stats")]
@@ -368,6 +479,36 @@ namespace Ene.Modules
             if (roleID == 0) return false;
             var targetRole = user.Guild.GetRole(roleID);
             return user.Roles.Contains(targetRole);
+        }
+
+        internal async Task SendIndividualMessages(string[] messages, bool useEmbed = false)
+        {
+            if(useEmbed)
+            {
+                var embed = new EmbedBuilder();
+                embed.WithDescription(messages[0]);
+                await Context.Channel.TriggerTypingAsync();
+                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[0]));
+                var message = await ReplyAsync("", false, embed.Build());
+
+                for(int i = 1; i < messages.Length; i++)
+                {
+                    await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[i]));
+                    await message.ModifyAsync(x => x.Embed = embed.WithDescription(messages[i]).Build());
+                }
+            }
+            else
+            {
+                await Context.Channel.TriggerTypingAsync();
+                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[0]));
+                var message = await ReplyAsync(messages[0]);
+
+                for (int i = 1; i < messages.Length; i++)
+                {
+                    await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[i]));
+                    await message.ModifyAsync(x => x.Content = messages[i]);
+                }
+            }
         }
 
         [Command("get data count.")]

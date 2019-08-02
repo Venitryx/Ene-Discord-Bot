@@ -34,5 +34,7 @@ namespace Ene
     {
         public string token;
         public string cmdPrefix;
+        public string redditUsername;
+        public string redditPassword;
     }
 }

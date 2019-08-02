@@ -68,6 +68,12 @@ namespace Ene.SystemLang
             return string.Join(" ", words);
         }
 
+        internal static string[] SplitIntoIndividualMessages(string previousString)
+        {
+            string[] messages = previousString.Split('|', StringSplitOptions.RemoveEmptyEntries);
+            return messages;
+        }
+
         private static bool isBotOwner(SocketUser user)
         {
             if (user.Id.Equals(229360837318410241)) return true;
@@ -75,14 +81,19 @@ namespace Ene.SystemLang
         }
         internal static string AddMasterSuffix(string previousString)
         {
+            //requires last character to be punctuation to work normally
+            string lastChar = previousString.Substring(previousString.Length - 1);
+            string newString = previousString.Substring(0, previousString.Length - 1);
             if (isBotOwner(Global.context.User))
             {
-                string lastChar = previousString.Substring(previousString.Length - 1);
-                string newString = previousString.Substring(0, previousString.Length - 1);
                 newString += (", master" + lastChar);
                 return newString;
             }
-            else return previousString;
+            else
+            {
+                newString += (", dude" + lastChar);
+                return newString;
+            }
         }
         internal static int milisecondsToDelayPerCharacter(string previousString)
         {

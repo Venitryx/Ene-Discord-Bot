@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ene.SystemLang.MiscCommands.DoYouLikeCommand
+namespace Ene.SystemLang.MiscCommands.LikeCommands
 {
     public class Like
     {

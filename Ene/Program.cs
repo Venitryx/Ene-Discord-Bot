@@ -12,7 +12,7 @@ using AIMLbot;
 using Ene.Core;
 using Ene.Services;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
-using Ene.SystemLang.MiscCommands.DoYouLikeCommand;
+using Ene.SystemLang.MiscCommands.LikeCommands;
 
 using Victoria;
 

@@ -7,23 +7,32 @@ using System.Linq;
 
 using Newtonsoft.Json;
 
-namespace Ene.SystemLang.MiscCommands.DoYouLikeCommand
+namespace Ene.SystemLang.MiscCommands.LikeCommands
 {
     public static class LikesStorage
     {
-        
-        //Save all userAccounts
         public static void SaveLikes(IEnumerable<Like> likes, string filePath)
         {
             string json = JsonConvert.SerializeObject(likes, Formatting.Indented);
             File.WriteAllText(filePath, json);
         }
-        //Get all userAccounts
+
+        public static void SaveDefaultLikeMessages(DefaultLikeMessages.DefaultLikeMessagesData defaultLikeMessagesData, string filePath)
+        {
+            string json = JsonConvert.SerializeObject(defaultLikeMessagesData, Formatting.Indented);
+            File.WriteAllText(filePath, json);
+        }
         public static IEnumerable<Like> LoadLikes(string filePath)
         {
             if (!File.Exists(filePath)) return null;
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<Like>>(json);
+        }
+
+        public static DefaultLikeMessages.DefaultLikeMessagesData LoadDefaultLikeMessages(string filePath)
+        {
+            string json = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<DefaultLikeMessages.DefaultLikeMessagesData>(json);
         }
 
         public static bool SaveExists(string filePath)
