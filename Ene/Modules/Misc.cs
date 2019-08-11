@@ -23,7 +23,6 @@ using RedditSharp;
 using NReco.ImageGenerator;
 using Newtonsoft.Json;
 using CoreHtmlToImage;
-using AIMLbot;
 using static RedditSharp.Things.VotableThing;
 
 namespace Ene.Modules
@@ -310,7 +309,7 @@ namespace Ene.Modules
         }
 
         [RequireUserPermission(GuildPermission.ManageMessages)]
-        [Command("secretly say: ")]
+        [Command("secretly say:")]
         public async Task SecretSay([Remainder]string msg)
         {
             var embed = new EmbedBuilder();
@@ -354,18 +353,42 @@ namespace Ene.Modules
         }
 
         [Command("add like")]
-        public async Task AddLike(string name, double value, bool useSpecialMessage = false, [Remainder]string specialMessage = null)
+        public async Task AddLike(string name, double likability = 5.0, bool useSpecialMessage = false, [Remainder]string specialMessage = null)
         {
-            var likedObject = Likes.GetLikedObject(objectName: name, value, useSpecialMessage, specialMessage);
+            var likedObject = Likes.GetLikedObject(objectName: name, likability, useSpecialMessage, specialMessage);
             await Context.Channel.TriggerTypingAsync();
             await Task.Delay(5000);
-            await Context.Channel.SendMessageAsync(string.Format("Added {0} with value of {1}", name, value));
+            await Context.Channel.SendMessageAsync(string.Format("Added {0} with value of {1}", name, likability));
         }
-        
-        [Command("do you like")]
-        public async Task AskDoYouLike(string objectName)
+
+        [RequireOwner]
+        [Command("load likes")]
+        public async Task LoadLikes()
         {
-            await SendIndividualMessages(StringManipulation.SplitIntoIndividualMessages(Likes.GetMessage(objectName)), true);
+            Likes.LoadObjects();
+            await ReplyAsync("Reloaded!");
+        }
+
+        [RequireOwner]
+        [Command("load like messages")]
+        public async Task LoadLikeMessages()
+        {
+            Likes.LoadDefaultLikeMessages();
+            await ReplyAsync("Reloaded!");
+        }
+
+        [RequireOwner]
+        [Command("reset like messages")]
+        public async Task ResetLikeMessages()
+        {
+            Likes.Reset();
+            await ReplyAsync("Resetted my config!");
+        }
+
+        [Command("do you like")]
+        public async Task AskDoYouLike([Remainder]string objectName)
+        {
+            await SendIndividualMessages(StringManipulation.SplitIntoIndividualMessages(StringManipulation.AddMasterSuffix(Likes.GetMessage(objectName))), true);
         }
 
         [Command("how much do you like")]
@@ -486,12 +509,13 @@ namespace Ene.Modules
             if(useEmbed)
             {
                 var embed = new EmbedBuilder();
-                embed.WithDescription(messages[0]);
+                embed.WithDescription("");
+                embed.WithColor(Global.mainColor);
                 await Context.Channel.TriggerTypingAsync();
-                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[0]));
+                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(""));
                 var message = await ReplyAsync("", false, embed.Build());
 
-                for(int i = 1; i < messages.Length; i++)
+                for(int i = 0; i < messages.Length; i++)
                 {
                     await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[i]));
                     await message.ModifyAsync(x => x.Embed = embed.WithDescription(messages[i]).Build());
@@ -500,10 +524,10 @@ namespace Ene.Modules
             else
             {
                 await Context.Channel.TriggerTypingAsync();
-                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[0]));
-                var message = await ReplyAsync(messages[0]);
+                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(""));
+                var message = await ReplyAsync("");
 
-                for (int i = 1; i < messages.Length; i++)
+                for (int i = 0; i < messages.Length; i++)
                 {
                     await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[i]));
                     await message.ModifyAsync(x => x.Content = messages[i]);

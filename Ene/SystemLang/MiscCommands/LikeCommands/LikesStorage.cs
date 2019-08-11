@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 
 using Newtonsoft.Json;
+using static Ene.SystemLang.MiscCommands.LikeCommands.DefaultLikeMessages;
 
 namespace Ene.SystemLang.MiscCommands.LikeCommands
 {
@@ -17,7 +18,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
             File.WriteAllText(filePath, json);
         }
 
-        public static void SaveDefaultLikeMessages(DefaultLikeMessages.DefaultLikeMessagesData defaultLikeMessagesData, string filePath)
+        public static void SaveDefaultLikeMessages(DefaultLikeMessagesData defaultLikeMessagesData, string filePath)
         {
             string json = JsonConvert.SerializeObject(defaultLikeMessagesData, Formatting.Indented);
             File.WriteAllText(filePath, json);
@@ -29,10 +30,10 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
             return JsonConvert.DeserializeObject<List<Like>>(json);
         }
 
-        public static DefaultLikeMessages.DefaultLikeMessagesData LoadDefaultLikeMessages(string filePath)
+        public static DefaultLikeMessagesData LoadDefaultLikeMessages(string filePath)
         {
             string json = File.ReadAllText(filePath);
-            return JsonConvert.DeserializeObject<DefaultLikeMessages.DefaultLikeMessagesData>(json);
+            return JsonConvert.DeserializeObject<DefaultLikeMessagesData>(json);
         }
 
         public static bool SaveExists(string filePath)

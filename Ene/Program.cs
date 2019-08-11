@@ -7,7 +7,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using Microsoft.Extensions.DependencyInjection;
-using AIMLbot;
 
 using Ene.Core;
 using Ene.Services;
@@ -29,6 +28,9 @@ namespace Ene
 
         public async Task StartAsync()
         {
+            EmotesStorage.SaveData();
+            Likes.Initialize();
+
             if (Config.bot.token == "" || Config.bot.token == null)
             {
                 Console.WriteLine("Invalid bot token!");
@@ -54,7 +56,6 @@ namespace Ene
             _client.ReactionAdded += OnReactionAdded;
             await _client.LoginAsync(TokenType.Bot, Config.bot.token);
 
-            EmotesStorage.SaveData();
             await _client.StartAsync();
             _services = SetUpServices();
             Global.Client = _client;

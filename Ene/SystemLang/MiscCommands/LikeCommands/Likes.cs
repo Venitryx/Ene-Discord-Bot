@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using static Ene.SystemLang.MiscCommands.LikeCommands.DefaultLikeMessages;
 
 namespace Ene.SystemLang.MiscCommands.LikeCommands
 {
@@ -9,24 +10,13 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
     {
         
         private static List<Like> likes;
-        private static DefaultLikeMessages.DefaultLikeMessagesData defaultLikeMessagesData;
+        private static DefaultLikeMessagesData defaultLikeMessagesData;
 
         private static string likesFile = "Resources/SystemLang/MiscCommands/LikeCommands/Likes.json";
         private static string defaultLikeMessagesFile = "Resources/SystemLang/MiscCommands/LikeCommands/DefaultLikeMessages.json";
         static Likes()
         {
-            if (LikesStorage.SaveExists(likesFile))
-            {
-                LoadObjects();
-            }
-            if (LikesStorage.SaveExists(defaultLikeMessagesFile))
-            {
-                LoadDefaultLikeMessages();
-            }
-            else
-            {
-                Initialize();
-            }
+            Initialize();
         }
 
         public static void SaveObjects()
@@ -55,6 +45,31 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
 
         }
 
+        private static Like GetOrCreateLikedObject(string ObjectName, double likability = 5.0, bool useSpecialMessage = false, string message = null)
+        {
+            var result = from l in likes
+                         where l.Name == ObjectName
+                         select l;
+
+            var like = result.FirstOrDefault();
+            if (like == null) like = CreateLikedObject(ObjectName, likability, useSpecialMessage, message);
+            return like;
+        }
+        private static Like CreateLikedObject(string name, double likability = 5.0, bool useSpecialMessage = false, string message = null)
+        {
+            var newLike = new Like()
+            {
+                Name = name,
+                Likability = likability,
+                UseSpecialMessage = useSpecialMessage,
+                Message = message
+            };
+
+            likes.Add(newLike);
+            SaveObjects();
+            return newLike;
+        }
+
         public static void InitializeLikes()
         {
             likes = new List<Like>();
@@ -64,11 +79,11 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
 
         public static void InitializeDefaultLikeMessages()
         {
-            defaultLikeMessagesData = new DefaultLikeMessages.DefaultLikeMessagesData()
+            defaultLikeMessagesData = new DefaultLikeMessagesData()
             {
-                lessThanZero = new string[] { },
-                greaterThanTen = new string[] { },
-                zeroToOne = new string[] { },
+                lessThanZero = new string[] { "Ew, no. Definitely not.", "...|No. Please don't remind me.", "Oh hell no. Please don't trigger any more dark memories." },
+                greaterThanTen = new string[] { "Ah. I see you're a man of culture as well.", "Ah yes. This is perfection." },
+                zeroToOne = new string[] { "Ew, no." },
                 oneToTwo = new string[] { },
                 twoToThree = new string[] { },
                 threeToFour = new string[] { },
@@ -82,10 +97,30 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
             SaveDefaultLikeMessages();
         }
 
-        public static void Initialize()
+        public static void Reset()
         {
             InitializeLikes();
             InitializeDefaultLikeMessages();
+        }
+        public static void Initialize()
+        {
+            if (LikesStorage.SaveExists(likesFile))
+            {
+                LoadObjects();
+            }
+            else
+            {
+                InitializeLikes();
+            }
+
+            if (LikesStorage.SaveExists(defaultLikeMessagesFile))
+            {
+                LoadDefaultLikeMessages();
+            }
+            else
+            {
+                InitializeDefaultLikeMessages();
+            }
         }
 
         public static string GetMessage(string ObjectName)
@@ -127,9 +162,9 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
 
         private static string[] GetDefaultLikabilityMessages(string ObjectName)
         {
-            int likability = (int) Math.Floor(GetLikability(ObjectName));
+            int likability = (int)Math.Floor(GetLikability(ObjectName));
 
-            switch(likability)
+            switch (likability)
             {
                 case 0:
                     return defaultLikeMessagesData.zeroToOne;
@@ -160,7 +195,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             int likability = (int)Math.Floor(GetLikability(ObjectName));
 
-            if(likability < 0)
+            if (likability < 0)
             {
                 return defaultLikeMessagesData.lessThanZero;
             }
@@ -169,31 +204,5 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
                 return defaultLikeMessagesData.greaterThanTen;
             }
         }
-
-        private static Like GetOrCreateLikedObject(string ObjectName, double likability = 5.0, bool useSpecialMessage = false, string message = null)
-        {
-            var result = from l in likes
-                         where l.Name == ObjectName
-                         select l;
-
-            var like = result.FirstOrDefault();
-            if (like == null) like = CreateLikedObject(ObjectName, likability, useSpecialMessage, message);
-            return like;
-        }
-        private static Like CreateLikedObject(string name, double likability = 5.0, bool useSpecialMessage = false, string message = null)
-        {
-            var newLike = new Like()
-            {
-                Name = name,
-                Likability = likability,
-                UseSpecialMessage = useSpecialMessage,
-                Message = message
-            };
-
-            likes.Add(newLike);
-            SaveObjects();
-            return newLike;
-        }
-        
     }
 }

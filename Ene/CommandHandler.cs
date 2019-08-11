@@ -10,7 +10,6 @@ using System.Reflection;
 using Ene.Core;
 using Ene.SystemLang;
 using Ene.Modules;
-using AIMLbot;
 
 namespace Ene
 {
