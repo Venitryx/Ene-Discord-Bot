@@ -28,9 +28,7 @@ namespace Ene
 
         public async Task StartAsync()
         {
-            EmotesStorage.SaveData();
-            Likes.Initialize();
-
+            Likes.Reload();
             if (Config.bot.token == "" || Config.bot.token == null)
             {
                 Console.WriteLine("Invalid bot token!");

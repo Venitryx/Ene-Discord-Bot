@@ -362,7 +362,7 @@ namespace Ene.Modules
         }
 
         [RequireOwner]
-        [Command("load likes")]
+        [Command("reload likes")]
         public async Task LoadLikes()
         {
             Likes.LoadObjects();
@@ -370,7 +370,15 @@ namespace Ene.Modules
         }
 
         [RequireOwner]
-        [Command("load like messages")]
+        [Command("reset likes")]
+        public async Task ResetLikes()
+        {
+            Likes.InitializeLikes();
+            await ReplyAsync("Resetted!");
+        }
+
+        [RequireOwner]
+        [Command("reload like messages")]
         public async Task LoadLikeMessages()
         {
             Likes.LoadDefaultLikeMessages();
@@ -381,8 +389,24 @@ namespace Ene.Modules
         [Command("reset like messages")]
         public async Task ResetLikeMessages()
         {
-            Likes.Reset();
-            await ReplyAsync("Resetted my config!");
+            Likes.InitializeDefaultLikeMessages();
+            await ReplyAsync("Resetted!");
+        }
+
+        [RequireOwner]
+        [Command("reload all")]
+        public async Task ReloadAll()
+        {
+            Likes.Reload();
+            await ReplyAsync("Reloaded!");
+        }
+
+        [RequireOwner]
+        [Command("reset all")]
+        public async Task ResetAll()
+        {
+            Likes.ResetOrInitialize();
+            await ReplyAsync("Resetted!");
         }
 
         [Command("do you like")]

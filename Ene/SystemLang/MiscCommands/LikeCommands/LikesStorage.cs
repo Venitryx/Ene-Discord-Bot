@@ -23,15 +23,43 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
             string json = JsonConvert.SerializeObject(defaultLikeMessagesData, Formatting.Indented);
             File.WriteAllText(filePath, json);
         }
+
+        public static string[] GetDirAndFilePath(string filePath)
+        {
+            string[] splitFilePath = filePath.Split(new char[] { '/'}, StringSplitOptions.RemoveEmptyEntries);
+            string folderPath = "";
+            string fileName = "";
+            foreach (string folder in splitFilePath)
+            {
+                if (!folder.Contains('.'))
+                {
+                    folderPath += (folder + '/');
+                }
+                else
+                {
+                    folderPath = folderPath.Substring(0, folderPath.Length-1);
+                    fileName = folder;
+                    break;
+                }
+            }
+            string[] trueDirAndFilePath = new string[] { folderPath, fileName};
+            return trueDirAndFilePath;
+        }
+
         public static IEnumerable<Like> LoadLikes(string filePath)
         {
-            if (!File.Exists(filePath)) return null;
+            string[] dirAndFilePath = GetDirAndFilePath(filePath);
+            if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
+            if (!File.Exists(filePath)) Likes.InitializeLikes();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<Like>>(json);
         }
 
         public static DefaultLikeMessagesData LoadDefaultLikeMessages(string filePath)
         {
+            string[] dirAndFilePath = GetDirAndFilePath(filePath);
+            if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
+            if (!File.Exists(filePath)) Likes.InitializeDefaultLikeMessages();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<DefaultLikeMessagesData>(json);
         }
@@ -40,51 +68,5 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             return File.Exists(filePath);
         }
-        
-        
-            /*
-        private const string likesStorageFolderPath = "Resources/SystemLang/MiscCommands/DoYouLikeCommand";
-        private const string likesStorageFilePath = "Likes.json";
-
-        private static Dictionary<string, int> pairs = new Dictionary<string, int>();
-
-        public static void AddLikesToStorage(string key, int value)
-        {
-            pairs.Add(key, value);
-            SaveData();
-        }
-
-        internal static int GetLikes(string key)
-        {
-            if (pairs.TryGetValue(key, out int value))
-            {
-                return value;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        static LikesStorage()
-        {
-            if (!Directory.Exists(likesStorageFolderPath)) Directory.CreateDirectory(likesStorageFolderPath);
-            if (!File.Exists(likesStorageFolderPath + "/" + likesStorageFilePath))
-            {
-                AddLikesToStorage("Kagerou Project", 10);
-            }
-            else
-            {
-                string json = File.ReadAllText(likesStorageFolderPath + "/" + likesStorageFilePath);
-                pairs = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
-            }
-        }
-
-        public static void SaveData()
-        {
-            string json = JsonConvert.SerializeObject(pairs, Formatting.Indented);
-            File.WriteAllText(likesStorageFolderPath + "/" + likesStorageFilePath, json);
-        }
-        */
     }
 }

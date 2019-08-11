@@ -16,7 +16,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         private static string defaultLikeMessagesFile = "Resources/SystemLang/MiscCommands/LikeCommands/DefaultLikeMessages.json";
         static Likes()
         {
-            Initialize();
+            Reload();
         }
 
         public static void SaveObjects()
@@ -96,31 +96,16 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
             };
             SaveDefaultLikeMessages();
         }
+        public static void Reload()
+        {
+            LoadObjects();
+            LoadDefaultLikeMessages();
+        }
 
-        public static void Reset()
+        public static void ResetOrInitialize()
         {
             InitializeLikes();
             InitializeDefaultLikeMessages();
-        }
-        public static void Initialize()
-        {
-            if (LikesStorage.SaveExists(likesFile))
-            {
-                LoadObjects();
-            }
-            else
-            {
-                InitializeLikes();
-            }
-
-            if (LikesStorage.SaveExists(defaultLikeMessagesFile))
-            {
-                LoadDefaultLikeMessages();
-            }
-            else
-            {
-                InitializeDefaultLikeMessages();
-            }
         }
 
         public static string GetMessage(string ObjectName)
