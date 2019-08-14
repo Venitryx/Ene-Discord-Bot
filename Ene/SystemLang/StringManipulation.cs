@@ -74,7 +74,7 @@ namespace Ene.SystemLang
             return messages;
         }
 
-        private static bool isBotOwner(SocketUser user)
+        internal static bool isBotOwner(SocketUser user)
         {
             if (user.Id.Equals(229360837318410241)) return true;
             else return false;

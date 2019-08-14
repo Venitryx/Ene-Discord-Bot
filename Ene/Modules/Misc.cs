@@ -281,16 +281,6 @@ namespace Ene.Modules
                     await Context.Channel.SendMessageAsync("", false, defaultEmbed.Build());
                     break;
             }
-            foreach (var post in subreddit.New.Take(5))
-            {
-                if (post.Title == "What is my karma?")
-                {
-                    // Note: This is an example. Bots are not permitted to cast votes automatically.
-                    post.Upvote();
-                    var comment = post.Comment(string.Format("You have {0} link karma!", post.Author.LinkKarma));
-                    comment.Distinguish(DistinguishType.Moderator);
-                }
-            }
         }
 
         [RequireUserPermission(GuildPermission.SendMessages)]
@@ -456,7 +446,7 @@ namespace Ene.Modules
             string[] options = msg.Split(new String[] {","}, StringSplitOptions.RemoveEmptyEntries);
             var command = Commands.GetCommandInfo(Context.User.Id, Context.Message.Content);
 
-            if(!msg.Contains(specialMessage))
+            if(!msg.Contains(specialMessage) || !StringManipulation.isBotOwner(Context.User))
             {
                 var embed = new EmbedBuilder();
                 switch(command.TimesRun)
@@ -511,13 +501,14 @@ namespace Ene.Modules
                         break;
                 }
             }
-            else
+            else if (StringManipulation.isBotOwner(Context.User))
             {
                 var embed = new EmbedBuilder();
-                switch (command.TimesRun)
+                switch (b)
                 {
                     case 0:
-                        embed.WithDescription("You should commit suicide.");
+                        command.Reply = "You should commit suicide.";
+                        embed.WithDescription(command.Reply);
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
                         await Context.Channel.TriggerTypingAsync();
@@ -535,7 +526,7 @@ namespace Ene.Modules
                         await Context.Channel.SendMessageAsync("", false, embed.Build());
                         break;
                     case 2:
-                        embed.WithDescription(String.Format("I said: \"{0}\"", command.Reply));
+                        embed.WithDescription(String.Format("You heard me: \"{0}\"", command.Reply));
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
                         await Context.Channel.TriggerTypingAsync();
@@ -544,7 +535,7 @@ namespace Ene.Modules
                         await Context.Channel.SendMessageAsync("", false, embed.Build());
                         break;
                     case 3:
-                        embed.WithDescription(String.Format("For the fourth time! I said: \"{0}\"", command.Reply));
+                        embed.WithDescription(String.Format("Are you messing around or actually an idiot? I said: \"{0}\"", command.Reply));
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
                         await Context.Channel.TriggerTypingAsync();
@@ -553,7 +544,7 @@ namespace Ene.Modules
                         await Context.Channel.SendMessageAsync("", false, embed.Build());
                         break;
                     case 4:
-                        embed.WithDescription("Urgh, go away already!");
+                        embed.WithDescription("Urgh, go die already!");
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
                         await Context.Channel.TriggerTypingAsync();
@@ -654,7 +645,7 @@ namespace Ene.Modules
                     await msg.DeleteAsync();
                 }
                 var embed = new EmbedBuilder();
-                embed.WithDescription(StringManipulation.AddMasterSuffix(String.Format("I'ved deleted {0} messages!", num)));
+                embed.WithDescription(StringManipulation.AddMasterSuffix(String.Format("I've deleted {0} messages!", num)));
                 var reply = await ReplyAsync("", false, embed.Build());
                 await Task.Delay(4000);
                 await reply.DeleteAsync();

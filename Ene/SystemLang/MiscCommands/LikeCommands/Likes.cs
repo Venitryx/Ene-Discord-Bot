@@ -84,15 +84,15 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
                 lessThanZero = new string[] { "Ew, no. Definitely not.", "...|No. Please don't remind me.", "Oh hell no. Please don't trigger any more dark memories." },
                 greaterThanTen = new string[] { "Ah. I see you're a man of culture as well.", "Ah yes. This is perfection." },
                 zeroToOne = new string[] { "Ew, no." },
-                oneToTwo = new string[] { },
+                oneToTwo = new string[] { ""},
                 twoToThree = new string[] { },
                 threeToFour = new string[] { },
-                fourToFive = new string[] { },
+                fourToFive = new string[] { "Eh, it's okay I guess. Could be better."},
                 fiveToSix = new string[] { },
                 sixToSeven = new string[] { },
                 sevenToEight = new string[] { },
                 eightToNine = new string[] { },
-                nineToTen = new string[] { }
+                nineToTen = new string[] { "Now this. This is pretty epic." }
             };
             SaveDefaultLikeMessages();
         }

@@ -4,6 +4,8 @@ using System.Text;
 using System.Linq;
 using Discord.WebSocket;
 
+using Ene.Core;
+
 namespace Ene.SystemLang.MiscCommands.ShouldICommand
 {
     public static class Commands
@@ -30,7 +32,7 @@ namespace Ene.SystemLang.MiscCommands.ShouldICommand
         public static void DeleteCommandInfo(ShouldI command)
         {
             var now = DateTime.UtcNow;
-            if(command.TimeOfCommand.AddMinutes(1) > now)
+            if(command.TimeOfCommand.AddSeconds(RepeatingTimer.loopingPurgeTimer.Interval) >= now)
             {
                 commands.Remove(command);
                 SaveCommandInfo();
@@ -40,14 +42,13 @@ namespace Ene.SystemLang.MiscCommands.ShouldICommand
         public static void DeleteAllCommandInfo()
         {
             var now = DateTime.UtcNow;
-            commands.RemoveAll(command => command.TimeOfCommand.AddMinutes(1) > now);
+            commands.RemoveAll(command => command.TimeOfCommand.AddSeconds(RepeatingTimer.loopingPurgeTimer.Interval) >= now);
             SaveCommandInfo();
         }
 
         public static void Initialize()
         {
-            commands = new List<ShouldI>();
-            var a = GetCommandInfo(229360837318410241, "oof");
+            commands = new List<ShouldI>() { };
         }
 
         public static ShouldI GetCommandInfo(ulong id, string command, string reply = null)
