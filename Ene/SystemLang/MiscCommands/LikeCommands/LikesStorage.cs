@@ -28,7 +28,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             string[] splitFilePath = filePath.Split(new char[] { '/'}, StringSplitOptions.RemoveEmptyEntries);
             string folderPath = "";
-            string fileName = "";
+            string wholeFilePath = "";
             foreach (string folder in splitFilePath)
             {
                 if (!folder.Contains('.'))
@@ -38,11 +38,11 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
                 else
                 {
                     folderPath = folderPath.Substring(0, folderPath.Length-1);
-                    fileName = folder;
+                    wholeFilePath = folderPath + "/" + folder;
                     break;
                 }
             }
-            string[] trueDirAndFilePath = new string[] { folderPath, fileName};
+            string[] trueDirAndFilePath = new string[] { folderPath, wholeFilePath};
             return trueDirAndFilePath;
         }
 
@@ -50,7 +50,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             string[] dirAndFilePath = GetDirAndFilePath(filePath);
             if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
-            if (!File.Exists(filePath)) Likes.InitializeLikes();
+            if (!File.Exists(dirAndFilePath[1])) Likes.InitializeLikes();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<Like>>(json);
         }
@@ -59,14 +59,9 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             string[] dirAndFilePath = GetDirAndFilePath(filePath);
             if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
-            if (!File.Exists(filePath)) Likes.InitializeDefaultLikeMessages();
+            if (!File.Exists(dirAndFilePath[1])) Likes.InitializeDefaultLikeMessages();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<DefaultLikeMessagesData>(json);
-        }
-
-        public static bool SaveExists(string filePath)
-        {
-            return File.Exists(filePath);
         }
     }
 }

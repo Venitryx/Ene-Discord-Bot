@@ -12,6 +12,7 @@ using Ene.Core;
 using Ene.Services;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
+using Ene.SystemLang.MiscCommands.ShouldICommand;
 
 using Victoria;
 
@@ -29,6 +30,7 @@ namespace Ene
         public async Task StartAsync()
         {
             Likes.Reload();
+            Commands.LoadCommandInfo();
             if (Config.bot.token == "" || Config.bot.token == null)
             {
                 Console.WriteLine("Invalid bot token!");
@@ -51,6 +53,7 @@ namespace Ene
             _client.Log += Log;
             _client.Ready += RepeatingTimer.StartSongActivityTimer;
             _client.Ready += RepeatingTimer.StartAfkTimer;
+            _client.Ready += RepeatingTimer.StartDeleteMessageTimer;
             _client.ReactionAdded += OnReactionAdded;
             await _client.LoginAsync(TokenType.Bot, Config.bot.token);
 

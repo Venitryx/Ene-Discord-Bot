@@ -8,18 +8,19 @@ using System.Timers;
 using Discord;
 using Discord.WebSocket;
 
+using Ene.SystemLang.MiscCommands.ShouldICommand;
+
 namespace Ene.Core
 {
     internal static class RepeatingTimer
     {
-        internal static Timer loopingSongActivityTimer, loopingAfkTimer;
+        internal static Timer loopingSongActivityTimer, loopingAfkTimer, loopingPurgeTimer;
         private static SocketTextChannel channel;
         private static Game game;
         private static bool isJapanese = true;
 
         internal static Task StartSongActivityTimer()
         {
-            //channel = Global.Client.GetGuild(446409245571678208).GetTextChannel(449695976714928140);
             loopingSongActivityTimer = new Timer()
             {
                 Interval = 3.5 * 60 * 1000,
@@ -46,6 +47,19 @@ namespace Ene.Core
             return Task.CompletedTask;
         }
 
+        internal static Task StartDeleteMessageTimer()
+        {
+            loopingPurgeTimer = new Timer()
+            {
+                Interval = 1 * 60 * 1000,
+                AutoReset = true,
+                Enabled = true
+            };
+            loopingPurgeTimer.Elapsed += OnPurgeTimerTicked;
+
+            return Task.CompletedTask;
+        }
+
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)
         {
             string songName = SongDisplay.getNameOfSong(SongDisplay.songIndex, isJapanese);
@@ -57,6 +71,13 @@ namespace Ene.Core
         private static async void OnAfkTimerTicked(object sender, ElapsedEventArgs e)
         {
             await Global.Client.SetStatusAsync(UserStatus.AFK);
+        }
+
+        private static async void OnPurgeTimerTicked(object sender, ElapsedEventArgs e)
+        {
+            Commands.DeleteAllCommandInfo();
+            channel = Global.Client.GetGuild(446409245571678208).GetTextChannel(591059698128519168);
+            await channel.SendMessageAsync("Purged!");
         }
     }
 }

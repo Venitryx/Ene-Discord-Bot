@@ -18,6 +18,7 @@ using Ene.Core.UserAccounts;
 using Ene.SystemLang;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
+using Ene.SystemLang.MiscCommands.ShouldICommand;
 
 using RedditSharp;
 using NReco.ImageGenerator;
@@ -29,6 +30,8 @@ namespace Ene.Modules
 {
     public class Misc : ModuleBase<SocketCommandContext>
     {
+        private string specialMessage = "commit suicide";
+        private int b = 0;
         [Alias("who are you?", "what are you", "what are you?")]
         [Command("who are you")]
         public async Task WhoAreYou()
@@ -203,7 +206,7 @@ namespace Ene.Modules
                         {
 
                         }
-                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithAuthor("u/" + post.AuthorName);
                         embed.WithTitle(post.Title);
                         embed.WithDescription(post.Url.AbsoluteUri);
                         embed.WithTimestamp(post.CreatedUTC);
@@ -223,7 +226,7 @@ namespace Ene.Modules
                         {
 
                         }
-                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithAuthor("u/" + post.AuthorName);
                         embed.WithTitle(post.Title);
                         embed.WithDescription(post.Url.AbsoluteUri);
                         embed.WithTimestamp(post.CreatedUTC);
@@ -243,7 +246,7 @@ namespace Ene.Modules
                         {
 
                         }
-                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithAuthor("u/" + post.AuthorName);
                         embed.WithTitle(post.Title);
                         embed.WithDescription(post.Url.AbsoluteUri);
                         embed.WithTimestamp(post.CreatedUTC);
@@ -263,7 +266,7 @@ namespace Ene.Modules
                         {
 
                         }
-                        embed.WithAuthor("/u/" + post.AuthorName);
+                        embed.WithAuthor("u/" + post.AuthorName);
                         embed.WithTitle(post.Title);
                         embed.WithDescription(post.Url.AbsoluteUri);
                         embed.WithTimestamp(post.CreatedUTC);
@@ -273,7 +276,7 @@ namespace Ene.Modules
                     break;
                 default:
                     var defaultEmbed = new EmbedBuilder();
-                    defaultEmbed.WithDescription("Invalid type! I can do types that are \"hot\",\"new\",\"controversial\", or \"rising.\"");
+                    defaultEmbed.WithDescription("Invalid type! I can do types that are \"hot\", \"new\", \"controversial\", or \"rising.\"");
                     defaultEmbed.WithColor(Global.mainColor);
                     await Context.Channel.SendMessageAsync("", false, defaultEmbed.Build());
                     break;
@@ -451,7 +454,122 @@ namespace Ene.Modules
         public async Task AskShouldUser([Remainder]string msg)
         {
             string[] options = msg.Split(new String[] {","}, StringSplitOptions.RemoveEmptyEntries);
+            var command = Commands.GetCommandInfo(Context.User.Id, Context.Message.Content);
 
+            if(!msg.Contains(specialMessage))
+            {
+                var embed = new EmbedBuilder();
+                switch(command.TimesRun)
+                {
+                    case 0:
+                        embed.WithDescription(GetMessage(msg, options, command));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 1:
+                        embed.WithDescription(String.Format("As I said before: \"{0}\"", command.Reply));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 2:
+                        embed.WithDescription(String.Format("I said: \"{0}\"", command.Reply));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 3:
+                        embed.WithDescription(String.Format("For the fourth time! I said: \"{0}\"", command.Reply));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 4:
+                        embed.WithDescription("Alright, stop bothering me already!");
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    default:
+                        await SpamShouldICommand(command);
+                        break;
+                }
+            }
+            else
+            {
+                var embed = new EmbedBuilder();
+                switch (command.TimesRun)
+                {
+                    case 0:
+                        embed.WithDescription("You should commit suicide.");
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 1:
+                        embed.WithDescription(String.Format("As I said before: \"{0}\"", command.Reply));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 2:
+                        embed.WithDescription(String.Format("I said: \"{0}\"", command.Reply));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 3:
+                        embed.WithDescription(String.Format("For the fourth time! I said: \"{0}\"", command.Reply));
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    case 4:
+                        embed.WithDescription("Urgh, go away already!");
+                        command.TimesRun++;
+                        Commands.SaveCommandInfo();
+                        await Context.Channel.TriggerTypingAsync();
+                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+                        embed.WithColor(Global.mainColor);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        break;
+                    default:
+                        await SpamShouldICommand(command);
+                        break;
+                }
+            }
+        }
+
+        public string GetMessage(string msg, string[] options, ShouldI command)
+        {
             if (options.Length is 1)
             {
                 var replies = new List<string>();
@@ -468,12 +586,12 @@ namespace Ene.Modules
                 Random r = new Random();
                 var answer = replies[r.Next(replies.Count)];
 
-                var embed = new EmbedBuilder();
-                embed.WithDescription(StringManipulation.AddMasterSuffix(answer));
-                embed.WithColor(Global.mainColor);
-                await Context.Channel.TriggerTypingAsync();
-                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(answer));
-                await Context.Channel.SendMessageAsync("", false, embed.Build());
+                string reply = StringManipulation.AddMasterSuffix(answer);
+                command.Reply = reply;
+
+                Commands.SaveCommandInfo();
+
+                return reply;
             }
             else
             {
@@ -488,14 +606,29 @@ namespace Ene.Modules
                 Random r = new Random();
                 string selection = options[r.Next(options.Length)];
 
-                var embed = new EmbedBuilder();
-                embed.WithDescription(StringManipulation.AddMasterSuffix("You should " + selection));
-                embed.WithColor(Global.mainColor);
-                await Context.Channel.TriggerTypingAsync();
-                await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(selection));
-                await Context.Channel.SendMessageAsync("", false, embed.Build());
+                string reply = StringManipulation.AddMasterSuffix("You should " + selection);
+
+                command.Reply = reply;
+                Commands.SaveCommandInfo();
+
+                return reply;
             }
         }
+
+        public async Task SpamShouldICommand(ShouldI command)
+        {
+            var embed = new EmbedBuilder();
+            embed.WithDescription("...");
+            command.TimesRun++;
+            Commands.SaveCommandInfo();
+            Commands.DeleteCommandInfo(command);
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+
         [Alias("what are my stats?")]
         [Command("what are my stats")]
         public async Task MyStats()
@@ -503,7 +636,31 @@ namespace Ene.Modules
             var account = UserAccounts.GetAccount(Context.User);
             await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix($"You have {account.XP} XP and {account.Points} points."));
         }
-      
+
+        [Command("delete messages:")]
+        public async Task DeleteMessages(string ammount)
+        {
+            if (!int.TryParse(ammount, out var num))
+            {
+                var embed = new EmbedBuilder();
+                embed.WithDescription("You have to enter a number.");
+                await ReplyAsync("", false, embed.Build());
+            }
+            else
+            {
+                var pastMessages = Context.Channel.GetMessagesAsync(num).FlattenAsync().Result;
+                foreach (var msg in pastMessages)
+                {
+                    await msg.DeleteAsync();
+                }
+                var embed = new EmbedBuilder();
+                embed.WithDescription(StringManipulation.AddMasterSuffix(String.Format("I'ved deleted {0} messages!", num)));
+                var reply = await ReplyAsync("", false, embed.Build());
+                await Task.Delay(4000);
+                await reply.DeleteAsync();
+            }
+        }
+
         [Command("help please.")]
         public async Task ShowCommands([Remainder]string arg = "")
         {
