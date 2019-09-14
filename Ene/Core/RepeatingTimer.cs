@@ -17,7 +17,6 @@ namespace Ene.Core
         internal static Timer loopingSongActivityTimer, loopingAfkTimer, loopingPurgeTimer;
         private static SocketTextChannel channel;
         private static Game game;
-        private static bool isJapanese = true;
 
         internal static Task StartSongActivityTimer()
         {
@@ -62,7 +61,7 @@ namespace Ene.Core
 
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)
         {
-            string songName = SongDisplay.getNameOfSong(SongDisplay.songIndex, isJapanese);
+            string songName = SongDisplay.getNameOfSong(SongDisplay.songIndex, SongDisplay.isJapanese);
             game = new Game(songName, ActivityType.Listening);
             SongDisplay.songIndex++;
             await Global.Client.SetActivityAsync(game);
@@ -76,8 +75,8 @@ namespace Ene.Core
         private static async void OnPurgeTimerTicked(object sender, ElapsedEventArgs e)
         {
             Commands.DeleteAllCommandInfo();
-            channel = Global.Client.GetGuild(446409245571678208).GetTextChannel(591059698128519168);
-            await channel.SendMessageAsync("Purged!");
+            //channel = Global.Client.GetGuild(446409245571678208).GetTextChannel(591059698128519168);
+            //await channel.SendMessageAsync("Purged!");
         }
     }
 }

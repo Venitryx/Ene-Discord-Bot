@@ -25,12 +25,13 @@ using NReco.ImageGenerator;
 using Newtonsoft.Json;
 using CoreHtmlToImage;
 using static RedditSharp.Things.VotableThing;
+using JikanDotNet;
 
 namespace Ene.Modules
 {
     public class Misc : ModuleBase<SocketCommandContext>
     {
-        private string specialMessage = "commit suicide";
+        private string specialMessage = "end";
         private int b = 0;
         [Alias("who are you?", "what are you", "what are you?")]
         [Command("who are you")]
@@ -112,8 +113,10 @@ namespace Ene.Modules
             var fieldMisc = new EmbedFieldBuilder()
                     .WithName("I can perform other various fun tasks!")
                     .WithValue($"Commands:" +
-                    $"\n{Config.bot.cmdPrefix}should I <insert action(s) here>?" +
-                    $"\n{Config.bot.cmdPrefix}say <message I should type to the channel>")
+                    $"\n{Config.bot.cmdPrefix}should I <insert_action(s)_here>?" +
+                    $"\n{Config.bot.cmdPrefix}do you like <insert_something_here>?" +
+                    $"\n{Config.bot.cmdPrefix}get subreddit: <type> <subreddit_name>" +
+                    $"\n{Config.bot.cmdPrefix}say: <message I should type to the channel>")
                     .WithIsInline(false);
             var embed = new EmbedBuilder()
                     .AddField(fieldMusic)
@@ -179,6 +182,101 @@ namespace Ene.Modules
             await Context.Channel.TriggerTypingAsync();
             await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(embed.Description));
             await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [Alias("get server info.", "get information about this server.")]
+        [Command("get server info")]
+        public async Task GetServerInfo()
+        {
+            var embed = new EmbedBuilder();
+            var fieldCreatedBy = new EmbedFieldBuilder()
+                    .WithName("Created By")
+                    .WithValue(Context.Guild.Owner.Nickname + "#" + Context.Guild.Owner.Discriminator)
+                    .WithIsInline(true);
+            var fieldServerCreated = new EmbedFieldBuilder()
+                    .WithName("Date Created")
+                    .WithValue(Context.Guild.CreatedAt.UtcDateTime)
+                    .WithIsInline(true);
+            var fieldMemberCount = new EmbedFieldBuilder()
+                    .WithName("Member Count")
+                    .WithValue(Context.Guild.GetRole(621081818153746433).Members.Count() + " Unique Members")
+                    .WithIsInline(true);
+
+            embed.WithTitle("Server Statistics");
+            embed.AddField(fieldCreatedBy).AddField(fieldServerCreated).AddField(fieldMemberCount);
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [Alias("get anime")]
+        [Command("get anime:")]
+        public async Task GetAnime([Remainder]string anime)
+        {
+            IJikan jikan = new Jikan(true);
+            AnimeSearchResult animeSearchResult = await jikan.SearchAnime(anime);
+
+            var embed = new EmbedBuilder();
+            var fieldAiring = new EmbedFieldBuilder()
+                    .WithName("Status")
+                    .WithValue(GetAnimeAiring(animeSearchResult))
+                    .WithIsInline(true);
+            var fieldStartDate = new EmbedFieldBuilder()
+                    .WithName("Aired")
+                    .WithValue(animeSearchResult.Results.First().StartDate.ToString() + " to " + GetAnimeEndDate(animeSearchResult))
+                    .WithIsInline(true);
+            var fieldRating = new EmbedFieldBuilder()
+                    .WithName("Rating")
+                    .WithValue(animeSearchResult.Results.First().Rated)
+                    .WithIsInline(true);
+            var fieldEpisodes = new EmbedFieldBuilder()
+                    .WithName("Episodes")
+                    .WithValue(animeSearchResult.Results.First().Episodes)
+                    .WithIsInline(true);
+
+
+            embed.WithTitle(animeSearchResult.Results.First().Title + "\n" + animeSearchResult.Results.First().URL);
+            embed.AddField(fieldAiring).AddField(fieldStartDate).AddField(fieldRating).AddField(fieldEpisodes);
+            embed.WithDescription(animeSearchResult.Results.First().Description);
+            embed.WithThumbnailUrl(animeSearchResult.Results.First().ImageURL);
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        [Alias("get this season's anime")]
+        [Command("get this season's anime.")]
+        public async Task GetSeason()
+        {
+            IJikan jikan = new Jikan(true);
+            Season season = jikan.GetSeason().Result;
+            string list = "";
+            int i = 1, limit = 20;
+            var embed = new EmbedBuilder();
+            foreach (var seasonEntry in season.SeasonEntries)
+            {
+                if (i < limit + 1)
+                {
+                    list += (i + ". " + seasonEntry.Title + "\n");
+                    i++;
+                }
+                else break;
+            }
+
+            embed.WithTitle(season.SeasonName + " " + season.SeasonYear + " Anime");
+            embed.WithDescription(list);
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
+        private static string GetAnimeAiring(AnimeSearchResult animeSearchResult)
+        {
+            if (animeSearchResult.Results.First().Airing) return "Currently Airing";
+            else return "Finished Airing";
+        }
+
+        private static string GetAnimeEndDate(AnimeSearchResult animeSearchResult)
+        {
+            if (animeSearchResult.Results.First().EndDate.HasValue == false) return "?";
+            else return animeSearchResult.Results.First().EndDate.ToString();
         }
 
         [Command("get subreddit:")]
@@ -345,6 +443,7 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("OwO.");
         }
 
+        [RequireOwner]
         [Command("add like")]
         public async Task AddLike(string name, double likability = 5.0, bool useSpecialMessage = false, [Remainder]string specialMessage = null)
         {
@@ -504,10 +603,10 @@ namespace Ene.Modules
             else if (StringManipulation.isBotOwner(Context.User))
             {
                 var embed = new EmbedBuilder();
-                switch (b)
+                switch (command.TimesRun)
                 {
                     case 0:
-                        command.Reply = "You should commit suicide.";
+                        command.Reply = "You should end the video here.";
                         embed.WithDescription(command.Reply);
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
@@ -646,6 +745,7 @@ namespace Ene.Modules
                 }
                 var embed = new EmbedBuilder();
                 embed.WithDescription(StringManipulation.AddMasterSuffix(String.Format("I've deleted {0} messages!", num)));
+                embed.WithColor(Global.mainColor);
                 var reply = await ReplyAsync("", false, embed.Build());
                 await Task.Delay(4000);
                 await reply.DeleteAsync();

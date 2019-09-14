@@ -32,7 +32,7 @@ namespace Ene.SystemLang.MiscCommands.ShouldICommand
         public static void DeleteCommandInfo(ShouldI command)
         {
             var now = DateTime.UtcNow;
-            if(command.TimeOfCommand.AddSeconds(RepeatingTimer.loopingPurgeTimer.Interval) >= now)
+            if(command.TimeOfCommand.AddMilliseconds(RepeatingTimer.loopingPurgeTimer.Interval) >= now)
             {
                 commands.Remove(command);
                 SaveCommandInfo();
@@ -42,7 +42,7 @@ namespace Ene.SystemLang.MiscCommands.ShouldICommand
         public static void DeleteAllCommandInfo()
         {
             var now = DateTime.UtcNow;
-            commands.RemoveAll(command => command.TimeOfCommand.AddSeconds(RepeatingTimer.loopingPurgeTimer.Interval) >= now);
+            commands.RemoveAll(command => command.TimeOfCommand.AddMilliseconds(RepeatingTimer.loopingPurgeTimer.Interval) >= now);
             SaveCommandInfo();
         }
 

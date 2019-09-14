@@ -91,7 +91,7 @@ namespace Ene.SystemLang
             }
             else
             {
-                newString += (", dude" + lastChar);
+                newString += ("" + lastChar);
                 return newString;
             }
         }
