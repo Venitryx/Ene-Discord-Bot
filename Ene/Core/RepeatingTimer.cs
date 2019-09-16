@@ -50,7 +50,7 @@ namespace Ene.Core
         {
             loopingPurgeTimer = new Timer()
             {
-                Interval = 1 * 60 * 1000,
+                Interval = 2 * 60 * 1000,
                 AutoReset = true,
                 Enabled = true
             };
@@ -75,8 +75,6 @@ namespace Ene.Core
         private static async void OnPurgeTimerTicked(object sender, ElapsedEventArgs e)
         {
             Commands.DeleteAllCommandInfo();
-            //channel = Global.Client.GetGuild(446409245571678208).GetTextChannel(591059698128519168);
-            //await channel.SendMessageAsync("Purged!");
         }
     }
 }

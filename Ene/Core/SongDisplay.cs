@@ -26,7 +26,7 @@ namespace Ene.Core
 
         internal static int songIndex;
         internal static int songCount;
-        internal static bool isJapanese = true;
+        internal static bool isJapanese = false;
 
         internal static string getNameOfSong(int index, bool isNameInJapanese)
         {
