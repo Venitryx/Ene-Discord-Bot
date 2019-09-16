@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
 using Ene.Core;
+using Ene.Core.Verification;
 using Ene.Services;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
@@ -31,6 +32,8 @@ namespace Ene
         {
             Likes.Reload();
             Commands.LoadCommandInfo();
+            VerifiedChannels.LoadVerificationInfo();
+
             if (Config.bot.token == "" || Config.bot.token == null)
             {
                 Console.WriteLine("Invalid bot token!");

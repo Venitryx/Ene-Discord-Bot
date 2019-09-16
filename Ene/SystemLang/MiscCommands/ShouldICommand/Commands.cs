@@ -49,6 +49,7 @@ namespace Ene.SystemLang.MiscCommands.ShouldICommand
         public static void Initialize()
         {
             commands = new List<ShouldI>() { };
+            SaveCommandInfo();
         }
 
         public static ShouldI GetCommandInfo(ulong id, string command, string reply = null)

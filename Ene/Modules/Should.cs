@@ -153,7 +153,6 @@ namespace Ene.Modules
                 }
             }
         }
-
         public string GetMessage(string msg, string[] options, ShouldI command)
         {
             if (options.Length is 1)
