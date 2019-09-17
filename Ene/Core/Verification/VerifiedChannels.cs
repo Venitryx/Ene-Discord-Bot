@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Discord.WebSocket;
+using Discord;
 
 namespace Ene.Core.Verification
 {
@@ -39,11 +40,15 @@ namespace Ene.Core.Verification
 
         }
 
+        //needs verification channel before verification command
+        //method for adding users to verified group
+
         private static VerifiedChannel GetOrCreateChannelInfo(ulong guildID, ulong channelID, ulong roleID)
         {
             var result = from v in verifiedChannels
                          where
-                         v.ChannelID == channelID
+                         v.GuildID == guildID 
+                         && v.ChannelID == channelID
                          && v.RoleID == roleID
                          select v;
 
@@ -57,7 +62,8 @@ namespace Ene.Core.Verification
             {
                 ChannelID = channelID,
                 RoleID = roleID,
-                GuildID = guildID
+                GuildID = guildID,
+                VerifiedUserIDs = new List<ulong>() { }
             };
 
             verifiedChannels.Add(newChannelInfo);
@@ -65,5 +71,25 @@ namespace Ene.Core.Verification
             return newChannelInfo;
         }
 
+        public static void AddUserVerified(SocketGuildUser guildUser, ulong guildID)
+        {
+            var result = from v in verifiedChannels
+                         where
+                         v.GuildID == guildID
+                         select v;
+            var channelInfo = result.FirstOrDefault();
+
+            ulong targetRoleID = channelInfo.RoleID;
+            var roleResult = from r in guildUser.Guild.Roles
+                         where r.Id == targetRoleID
+                         select r;
+            IRole role = roleResult.FirstOrDefault();
+
+            var verifiedUserIDs = channelInfo.VerifiedUserIDs;
+            if(!verifiedUserIDs.Contains(guildUser.Id))
+                verifiedUserIDs.Add(guildUser.Id);
+            guildUser.AddRoleAsync(role);
+            SaveVerificationInfo();
+        }
     }
 }

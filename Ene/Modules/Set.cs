@@ -33,12 +33,12 @@ namespace Ene.Modules
     [Group("set")]
     public class Set : ModuleBase<SocketCommandContext>
     {
-        [Alias("verification channel")]
+        [Alias("verification channel", "verification channel to:", "verification channel to")]
         [Command("verification channel:")]
-        public async Task SetVerificationChannel(ulong channelID, ulong roleID)
+        public async Task SetVerificationChannel(SocketGuildChannel guildChannel, ulong roleID)
         {
-            VerifiedChannels.GetChannelInfo(Context.Guild.Id, channelID, roleID);
-            await Context.Channel.SendMessageAsync("Setting verification channel to " + channelID);
+            VerifiedChannels.GetChannelInfo(Context.Guild.Id, guildChannel.Id, roleID);
+            await Context.Channel.SendMessageAsync("All new members will now need to verify in #" + guildChannel + " before being able to access channels.");
         }
     }
 }

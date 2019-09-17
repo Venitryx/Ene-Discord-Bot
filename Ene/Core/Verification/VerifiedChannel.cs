@@ -9,5 +9,6 @@ namespace Ene.Core.Verification
         public ulong ChannelID { get; set; }
         public ulong GuildID { get; set; }
         public ulong RoleID { get; set; }
+        public List<ulong> VerifiedUserIDs { get; set; }
     }
 }

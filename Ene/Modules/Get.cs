@@ -29,6 +29,7 @@ using JikanDotNet;
 
 namespace Ene.Modules
 {
+    [Group("get")]
     public class Get : ModuleBase<SocketCommandContext>
     {
         [Alias("random person.", "a random person", "a random person.")]
