@@ -59,11 +59,22 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix("All done!"));
         }
 
-        [Alias("verify")]
         [Command("verify:")]
-        public async Task Verify()
+        public async Task Verify(string firstName, string lastName, int bookNumber, [Remainder]string nickname = null)
         {
+            var embed = new EmbedBuilder();
+            string message = "Yokoso, {0}.";
+            embed.WithDescription(String.Format(message, firstName));
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(message));
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+
             VerifiedChannels.AddUserVerified((SocketGuildUser)Context.User, Context.Guild.Id);
+            /*if(nickname != null)
+                await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = firstName + " " + lastName.Substring(0, 1) + ". [" + bookNumber + "] aka " + nickname);
+            else*/ await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = firstName + " " + lastName.Substring(0, 1) + ". [" + bookNumber + "]");
+
         }
 
 
