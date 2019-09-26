@@ -286,7 +286,7 @@ namespace Ene.Modules
 
         internal async Task SendIndividualMessages(string[] messages, bool useEmbed = false)
         {
-            if(useEmbed)
+            if (useEmbed)
             {
                 var embed = new EmbedBuilder();
                 embed.WithDescription("");
@@ -295,7 +295,7 @@ namespace Ene.Modules
                 await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(""));
                 var message = await ReplyAsync("", false, embed.Build());
 
-                for(int i = 0; i < messages.Length; i++)
+                for (int i = 0; i < messages.Length; i++)
                 {
                     await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(messages[i]));
                     await message.ModifyAsync(x => x.Embed = embed.WithDescription(messages[i]).Build());

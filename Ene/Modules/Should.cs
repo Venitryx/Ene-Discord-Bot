@@ -102,7 +102,7 @@ namespace Ene.Modules
                 switch (command.TimesRun)
                 {
                     case 0:
-                        command.Reply = "You should end the video here.";
+                        command.Reply = "Yes, you should end your life.";
                         embed.WithDescription(command.Reply);
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
