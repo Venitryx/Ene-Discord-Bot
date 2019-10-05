@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 using Discord;
 using Discord.Commands;
@@ -30,6 +31,7 @@ namespace Ene
 
         public async Task StartAsync()
         {
+            LaunchLavaLink();
             Likes.Reload();
             Commands.LoadCommandInfo();
             VerifiedChannels.LoadVerificationInfo();
@@ -87,7 +89,10 @@ namespace Ene
                 }
             }
         }
-
+        private void LaunchLavaLink()
+        {
+            Process.Start(new ProcessStartInfo("cmd.exe", "/c java -jar Lavalink.jar"));
+        }
         private IServiceProvider SetUpServices()
             => new ServiceCollection()
             .AddSingleton(_client)

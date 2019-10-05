@@ -43,10 +43,10 @@ namespace Ene.Modules
                     .WithName("I can play music!")
                     .WithValue($"Commands:" +
                     $"\n{Config.bot.cmdPrefix}join the channel." +
-                    $"\n{Config.bot.cmdPrefix}play <youtube link or search>" +
+                    $"\n{Config.bot.cmdPrefix}play <YouTube/SoundCloud> <link or search>" +
                     $"\n{Config.bot.cmdPrefix}stop playing." +
                     $"\n{Config.bot.cmdPrefix}skip the song." +
-                    $"\n{Config.bot.cmdPrefix}stop playing." +
+                    $"\n{Config.bot.cmdPrefix}repeat the song." +
                     $"\n{Config.bot.cmdPrefix}leave the channel.")
                     .WithIsInline(true);
             var fieldMisc = new EmbedFieldBuilder()
