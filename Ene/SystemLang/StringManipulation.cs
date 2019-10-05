@@ -6,6 +6,7 @@ using System.Linq;
 
 using Discord;
 using Discord.WebSocket;
+using System.Text.RegularExpressions;
 
 namespace Ene.SystemLang
 {
@@ -68,10 +69,34 @@ namespace Ene.SystemLang
             return string.Join(" ", words);
         }
 
+        internal static string CensorSwearWords(string message)
+        {
+            const string CensoredText = "OOF";
+            const string PatternTemplate = @"\b({0})(s?)\b";
+            const RegexOptions Options = RegexOptions.IgnoreCase;
+
+            string[] badWords = new[] { "faggot", "bitch", "shit", "fuck", "ass", "tit", "cunt", "pussy"};
+
+            IEnumerable<Regex> badWordMatchers = badWords.Select(x => new Regex(string.Format(PatternTemplate, x), Options));
+
+
+            string output = badWordMatchers.Aggregate(message, (current, matcher) => matcher.Replace(current, CensoredText));
+
+            return output;
+        }
         internal static string[] SplitIntoIndividualMessages(string previousString)
         {
             string[] messages = previousString.Split('|', StringSplitOptions.RemoveEmptyEntries);
             return messages;
+        }
+
+        internal static string GetMasterPlaceholder(SocketUser user)
+        {
+            if (isBotOwner(user))
+            {
+                return "Master";
+            }
+            else return user.Username;
         }
 
         internal static bool isBotOwner(SocketUser user)
@@ -86,7 +111,7 @@ namespace Ene.SystemLang
             string newString = previousString.Substring(0, previousString.Length - 1);
             if (isBotOwner(Global.context.User))
             {
-                newString += (", master" + lastChar);
+                newString += (", Master" + lastChar);
                 return newString;
             }
             else

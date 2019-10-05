@@ -11,33 +11,68 @@ namespace Ene.Handlers
 
         public static async Task<Embed> CreateBasicEmbedWTitle(string title, string description, Color color, string imageURL = null)
         {
-            var embed = await Task.Run(() => (new EmbedBuilder()
+            if(imageURL != null)
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
                 .WithTitle(title)
                 .WithDescription(description)
                 .WithColor(color)
                 .WithImageUrl(imageURL)
-                .WithCurrentTimestamp().Build()));
-            return embed;
+                .Build()));
+                return embed;
+            }
+            else
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                .WithTitle(title)
+                .WithDescription(description)
+                .WithColor(color)
+                .Build()));
+                return embed;
+            }
+
         }
 
         public static async Task<Embed> CreateBasicEmbedWOTitle(string description, Color color, string imageURL = null)
         {
-            var embed = await Task.Run(() => (new EmbedBuilder()
+            if(imageURL != null)
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
                 .WithDescription(description)
                 .WithColor(color)
                 .WithImageUrl(imageURL)
-                .WithCurrentTimestamp().Build()));
-            return embed;
+                .Build()));
+                return embed;
+            }
+            else
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                .WithDescription(description)
+                .WithColor(color)
+                .Build()));
+                return embed;
+            }
         }
 
         public static async Task<Embed> CreateBasicEmbedTitleOnly(string title, Color color, string imageURL = null)
         {
-            var embed = await Task.Run(() => (new EmbedBuilder()
+            if(imageURL != null)
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
                 .WithTitle(title)
                 .WithColor(color)
                 .WithImageUrl(imageURL)
-                .WithCurrentTimestamp().Build()));
-            return embed;
+                .Build()));
+                return embed;
+            }
+            else
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                .WithTitle(title)
+                .WithColor(color)
+                .Build()));
+                return embed;
+            }
         }
 
         public static async Task<Embed> CreateErrorEmbed(string source, string error)

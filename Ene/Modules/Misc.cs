@@ -27,6 +27,7 @@ using Newtonsoft.Json;
 using CoreHtmlToImage;
 using static RedditSharp.Things.VotableThing;
 using JikanDotNet;
+using Ene.Handlers;
 
 namespace Ene.Modules
 {
@@ -57,6 +58,18 @@ namespace Ene.Modules
                 }
             }
             await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix("All done!"));
+        }
+
+        [RequireOwner]
+        [Alias("go to sleep")]
+        [Command("go to sleep.")]
+        public async Task Sleep()
+        {
+            var embed = await EmbedHandler.CreateBasicEmbedTitleOnly("Okay, oyasumi!", Global.mainColor, "https://i.pinimg.com/564x/f2/57/e8/f257e84288cead745bc3cc5b22e858d0.jpg");
+            await Context.Channel.TriggerTypingAsync();
+            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(embed.Title));
+            await Context.Channel.SendMessageAsync("", false, embed);
+            await Context.Client.SetStatusAsync(UserStatus.Offline);
         }
 
         [Command("verify:")]

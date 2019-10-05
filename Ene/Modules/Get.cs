@@ -16,9 +16,6 @@ using Discord.Audio;
 
 using Ene.Core.UserAccounts;
 using Ene.SystemLang;
-using Ene.SystemLang.MiscCommands.AreYouCommand;
-using Ene.SystemLang.MiscCommands.LikeCommands;
-using Ene.SystemLang.MiscCommands.ShouldICommand;
 
 using RedditSharp;
 using NReco.ImageGenerator;
@@ -84,12 +81,13 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
+        //keep Jikan updated to avoid null exception
         [Alias("anime")]
         [Command("anime:")]
         public async Task GetAnime([Remainder]string anime)
         {
             IJikan jikan = new Jikan(true);
-            AnimeSearchResult animeSearchResult = await jikan.SearchAnime(anime);
+            var animeSearchResult = await jikan.SearchAnime(anime);
 
             var embed = new EmbedBuilder();
             var fieldAiring = new EmbedFieldBuilder()
@@ -160,97 +158,112 @@ namespace Ene.Modules
             else return animeSearchResult.Results.First().EndDate.ToString();
         }
 
+        [Alias("subreddit")]
         [Command("subreddit:")]
-        public async Task GetSubreddit(string type, string sub = "/r/animemes")
+        public async Task GetSubreddit(string type = "hot", string sub = "/r/animemes")
         {
             var reddit = new Reddit();
             var user = reddit.LogIn(Config.bot.redditUsername, Config.bot.redditPassword);
             var subreddit = reddit.GetSubreddit(sub);
-            subreddit.Subscribe();
+            //subreddit.Subscribe();
 
             type = StringManipulation.StripPunctuation(type);
             type = StringManipulation.StripSymbols(type);
 
+            int postsCount = 10;
+
             switch (type)
             {
                 case "hot":
-                    foreach (var post in subreddit.Hot.Take(5))
+                    foreach (var post in subreddit.Hot.Take(postsCount))
                     {
-                        var embed = new EmbedBuilder();
-                        try
+                        if(!post.NSFW)
                         {
-                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
-                        }
-                        catch (InvalidOperationException)
-                        {
+                            var embed = new EmbedBuilder();
+                            try
+                            {
+                                embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                            }
+                            catch (InvalidOperationException)
+                            {
 
+                            }
+                            embed.WithAuthor("u/" + post.AuthorName);
+                            embed.WithTitle(StringManipulation.CensorSwearWords(post.Title));
+                            embed.WithDescription(post.Url.AbsoluteUri);
+                            embed.WithTimestamp(post.CreatedUTC);
+                            embed.WithColor(Global.mainColor);
+                            await Context.Channel.SendMessageAsync("", false, embed.Build());
                         }
-                        embed.WithAuthor("u/" + post.AuthorName);
-                        embed.WithTitle(post.Title);
-                        embed.WithDescription(post.Url.AbsoluteUri);
-                        embed.WithTimestamp(post.CreatedUTC);
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
                     }
                     break;
                 case "new":
-                    foreach (var post in subreddit.New.Take(5))
+                    foreach (var post in subreddit.New.Take(postsCount))
                     {
-                        var embed = new EmbedBuilder();
-                        try
+                        if(!post.NSFW)
                         {
-                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
-                        }
-                        catch (InvalidOperationException)
-                        {
+                            var embed = new EmbedBuilder();
+                            try
+                            {
+                                embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                            }
+                            catch (InvalidOperationException)
+                            {
 
+                            }
+                            embed.WithAuthor("u/" + post.AuthorName);
+                            embed.WithTitle(StringManipulation.CensorSwearWords(post.Title));
+                            embed.WithDescription(post.Url.AbsoluteUri);
+                            embed.WithTimestamp(post.CreatedUTC);
+                            embed.WithColor(Global.mainColor);
+                            await Context.Channel.SendMessageAsync("", false, embed.Build());
                         }
-                        embed.WithAuthor("u/" + post.AuthorName);
-                        embed.WithTitle(post.Title);
-                        embed.WithDescription(post.Url.AbsoluteUri);
-                        embed.WithTimestamp(post.CreatedUTC);
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
                     }
                     break;
                 case "controversial":
-                    foreach (var post in subreddit.Controversial.Take(5))
+                    foreach (var post in subreddit.Controversial.Take(postsCount))
                     {
-                        var embed = new EmbedBuilder();
-                        try
+                        if (!post.NSFW)
                         {
-                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
-                        }
-                        catch (InvalidOperationException)
-                        {
+                            var embed = new EmbedBuilder();
+                            try
+                            {
+                                embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                            }
+                            catch (InvalidOperationException)
+                            {
 
+                            }
+                            embed.WithAuthor("u/" + post.AuthorName);
+                            embed.WithTitle(StringManipulation.CensorSwearWords(post.Title));
+                            embed.WithDescription(post.Url.AbsoluteUri);
+                            embed.WithTimestamp(post.CreatedUTC);
+                            embed.WithColor(Global.mainColor);
+                            await Context.Channel.SendMessageAsync("", false, embed.Build());
                         }
-                        embed.WithAuthor("u/" + post.AuthorName);
-                        embed.WithTitle(post.Title);
-                        embed.WithDescription(post.Url.AbsoluteUri);
-                        embed.WithTimestamp(post.CreatedUTC);
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
                     }
                     break;
                 case "rising":
-                    foreach (var post in subreddit.Rising.Take(5))
+                    foreach (var post in subreddit.Rising.Take(postsCount))
                     {
-                        var embed = new EmbedBuilder();
-                        try
+                        if (!post.NSFW)
                         {
-                            embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
-                        }
-                        catch (InvalidOperationException)
-                        {
+                            var embed = new EmbedBuilder();
+                            try
+                            {
+                                embed.WithThumbnailUrl(post.Thumbnail.AbsoluteUri);
+                            }
+                            catch (InvalidOperationException)
+                            {
 
+                            }
+                            embed.WithAuthor("u/" + post.AuthorName);
+                            embed.WithTitle(StringManipulation.CensorSwearWords(post.Title));
+                            embed.WithDescription(post.Url.AbsoluteUri);
+                            embed.WithTimestamp(post.CreatedUTC);
+                            embed.WithColor(Global.mainColor);
+                            await Context.Channel.SendMessageAsync("", false, embed.Build());
                         }
-                        embed.WithAuthor("u/" + post.AuthorName);
-                        embed.WithTitle(post.Title);
-                        embed.WithDescription(post.Url.AbsoluteUri);
-                        embed.WithTimestamp(post.CreatedUTC);
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
                     }
                     break;
                 default:

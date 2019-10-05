@@ -24,7 +24,7 @@ namespace Ene.Modules
         
 
 
-        
+        [Alias("join the channel", "join.", "join")]
         [Command("join the channel.")]
         public async Task Join()
         {
@@ -46,6 +46,7 @@ namespace Ene.Modules
             }
         }
 
+        [Alias("leave the channel", "leave.", "leave")]
         [Command("leave the channel.")]
         public async Task Leave()
         {
@@ -61,18 +62,9 @@ namespace Ene.Modules
             else
             {
                 await _musicService.LeaveAsync(user.VoiceChannel);
-                embed.WithDescription(String.Format("Okay {0}, see ya later!", GetMasterPlaceholder(Context.User)));
+                embed.WithDescription(String.Format("Okay {0}, see ya later!", StringManipulation.GetMasterPlaceholder(Context.User)));
             }
             await ReplyAsync("", false, embed.Build());
-        }
-
-        private string GetMasterPlaceholder(SocketUser user)
-        {
-            if (StringManipulation.isBotOwner(user))
-            {
-                return "Master";
-            }
-            else return user.Username;
         }
 
         [Command("play")]
@@ -96,6 +88,7 @@ namespace Ene.Modules
             }
         }
 
+        [Alias("stop playing", "stop.", "stop")]
         [Command("stop playing.")]
         public async Task Stop()
         {
@@ -103,6 +96,15 @@ namespace Ene.Modules
             await ReplyAsync("", false, result);
         }
 
+        [Alias("get lyrics")]
+        [Command("get lyrics.")]
+        public async Task Lyrics()
+        {
+            var result = await _musicService.GetLyrics(Context.Guild.Id);
+            await ReplyAsync("", false, result);
+        }
+
+        [Alias("skip the song", "skip.", "skip")]
         [Command("skip the song.")]
         public async Task Skip()
         {
@@ -117,6 +119,7 @@ namespace Ene.Modules
             await ReplyAsync("", false, result);
         }
 
+        [Alias("pause the song", "pause.", "pause")]
         [Command("pause the song.")]
         public async Task Pause()
         {
@@ -124,6 +127,7 @@ namespace Ene.Modules
             await ReplyAsync("", false, result);
         }
 
+        [Alias("resume playing", "resume.", "resume")]
         [Command("resume playing.")]
         public async Task Resume()
         {
@@ -131,10 +135,11 @@ namespace Ene.Modules
             await ReplyAsync("", false, result);
         }
 
+        [Alias("repeat the song", "repeat this song.", "repeat this song", "repeat.", "repeat")]
         [Command("repeat the song.")]
         public async Task Repeat()
         {
-            var result = await _musicService.ResumeAsync(Context.Guild.Id);
+            var result = await _musicService.RepeatAsync(Context.Guild.Id);
             await ReplyAsync("", false, result);
         }
 

@@ -45,9 +45,9 @@ namespace Ene.Services
         {
             var _player = _lavaSocketClient.GetPlayer(guildID);
 
-            if (search.Equals("YouTube:"))
+            if (search.Equals("YouTube"))
             {
-                var results = await _lavaRestClient.SearchYouTubeAsync(query);
+                var results = await _lavaRestClient.SearchYouTubeAsync(query); //able to play YouTube searches but not youtube direct links. Used to do both before.
                 if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
                 {
                     string description = String.Format("Sorry, that song doesn't exist or it can't be loaded: {0}.", query);
@@ -72,7 +72,7 @@ namespace Ene.Services
                     return await EmbedHandler.CreateBasicEmbedTitleOnly(description, Global.mainColor, imageURL);
                 }
             }
-            else if (search.Equals("SoundCloud:"))
+            else if (search.Equals("SoundCloud"))
             {
                 var results = await _lavaRestClient.SearchSoundcloudAsync(query);
                 if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
@@ -101,7 +101,7 @@ namespace Ene.Services
             }
             else
             {
-                string description = String.Format("Must have a valid search method! Try using \"SoundCloud:\" or \"YouTube:\".");
+                string description = String.Format("Must have a valid search method! Try using \"SoundCloud\" or \"YouTube\".");
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
 
             }
@@ -141,8 +141,10 @@ namespace Ene.Services
 
             var oldTrack = _player.CurrentTrack;
             await _player.SkipAsync();
+
+            string imageURL = await VictoriaExtensions.FetchThumbnailAsync(_player.CurrentTrack);
             string description = String.Format("Fine. Skipping: {0}\n \nNow Playing: {1}", oldTrack.Title, _player.CurrentTrack.Title);
-            return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
+            return await EmbedHandler.CreateBasicEmbedTitleOnly(description, Global.mainColor, imageURL);
         }
 
         public async Task<Embed> SetVolumeAsync(int vol, ulong guildID)
@@ -151,18 +153,18 @@ namespace Ene.Services
 
             if (_player is null)
             {
-                string nothingPlayingDescription = "Nothing is playing.";
+                string nothingPlayingDescription = "Can't set the volume if nothing is playing!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(nothingPlayingDescription, Global.mainColor);
             }
 
             if (vol > 150 || vol <= 2)
             {
-                string volumeDescription = "Please use a number between 2 - 150.";
+                string volumeDescription = "Please use a number between 2 - 150!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(volumeDescription, Global.mainColor);
             }
 
             await _player.SetVolumeAsync(vol);
-            string description = String.Format("The volume is set to: {0}.", vol);
+            string description = String.Format("The volume is set to {0}!", vol);
             return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
         }
 
@@ -172,20 +174,20 @@ namespace Ene.Services
 
             if (_player is null)
             {
-                string description = "Nothing is playing.";
+                string description = "Nothing is playing!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
             }
 
             if (!_player.IsPaused)
             {
                 await _player.PauseAsync();
-                string description = "Music is paused.";
+                string description = "Music is paused!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
             }
             else
             {
                 await _player.ResumeAsync();
-                string description = "Music resumed.";
+                string description = "Music resumed!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
             }
         }
@@ -196,7 +198,7 @@ namespace Ene.Services
 
             if (_player is null)
             {
-                string description = "Nothing is playing.";
+                string description = "Can't resume if nothing is playing!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
 
             }              
@@ -204,13 +206,84 @@ namespace Ene.Services
             if (_player.IsPaused)
             {
                 await _player.ResumeAsync();
-                string description = "Music resumed.";
+                string description = "Music resumed!";
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
             }
 
-            string alreadyNotPausedDescription = "Music is already not paused.";
+            string alreadyNotPausedDescription = "Music is already unpaused!";
             return await EmbedHandler.CreateBasicEmbedWOTitle(alreadyNotPausedDescription, Global.mainColor);
         }
+
+        public async Task<Embed> RepeatAsync(ulong guildID)
+        {
+            var _player = _lavaSocketClient.GetPlayer(guildID);
+
+            if (_player is null)
+            {
+                string description = "Can't repeat if nothing is playing!";
+                return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
+
+            }
+
+            if (_player.Queue.Items.Count() != 0)
+            {
+                string nothingLeftDescription = "Readding this song to the queue!";
+                var track = _player.CurrentTrack;
+                _player.Queue.Enqueue(track);
+                return await EmbedHandler.CreateBasicEmbedWOTitle(nothingLeftDescription, Global.mainColor);
+            }
+            else
+            {
+                string alreadyNotPausedDescription = "Okay! I will repeat this song once it's done!";
+                var track = _player.CurrentTrack;
+                _player.Queue.Enqueue(track);
+                return await EmbedHandler.CreateBasicEmbedWOTitle(alreadyNotPausedDescription, Global.mainColor);
+            }
+        }
+
+        public async Task<Embed> GetLyrics(ulong guildID)
+        {
+            var _player = _lavaSocketClient.GetPlayer(guildID);
+
+            if (_player is null)
+            {
+                string description = "Can't get lyrics if nothing is playing!";
+                return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
+
+            }
+
+            var track = _player.CurrentTrack;
+            string lyrics = await VictoriaExtensions.FetchLyricsAsync(track);
+            if (string.IsNullOrWhiteSpace(lyrics))
+            {
+                return await EmbedHandler.CreateBasicEmbedWOTitle("Can't find any lyrics!", Global.mainColor);
+            }
+            else return await EmbedHandler.CreateBasicEmbedWOTitle(lyrics, Global.mainColor);
+
+        }
+
+        /*
+        public async Task<Embed> LoopAsync(string isLooping, ulong guildID)
+        {
+            var _player = _lavaSocketClient.GetPlayer(guildID);
+
+            if (_player is null)
+            {
+                string description = "Can't loop if nothing is playing!";
+                return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
+            }
+
+            if(isLooping.Equals("y") || isLooping.Equals("yes") || isLooping.Equals("true"))
+            {
+                
+            }
+            else if(isLooping.Equals("n") || isLooping.Equals("no") || isLooping.Equals("false"))
+            {
+
+            }
+            
+        }
+        */
 
         private async Task ClientReadyAsync()
         {
@@ -222,20 +295,18 @@ namespace Ene.Services
             if (!reason.ShouldPlayNext())
                 return;
 
-            var embed = new EmbedBuilder();
-            embed.WithColor(Global.mainColor);
-
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
-                embed.WithDescription("There are no more songs.");
-                await player.TextChannel.SendMessageAsync("", false, embed.Build());
+                var embed = await EmbedHandler.CreateBasicEmbedWOTitle("There are no more songs.", Global.mainColor);
+                await player.TextChannel.SendMessageAsync("", false, embed);
                 return;
             }
             else
             {
-                embed.WithDescription(String.Format("Now Playing: {0}", nextTrack.Title));
+                string imageURL = await VictoriaExtensions.FetchThumbnailAsync(nextTrack);
+                var embed = await EmbedHandler.CreateBasicEmbedTitleOnly(String.Format("Now Playing: {0}", nextTrack.Title), Global.mainColor, imageURL);
                 await player.PlayAsync(nextTrack);
-                await player.TextChannel.SendMessageAsync("", false, embed.Build());
+                await player.TextChannel.SendMessageAsync("", false, embed);
             }
         }
 
