@@ -7,8 +7,11 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
+using Ene.Preconditions;
 using Ene.Services;
 using Ene.SystemLang;
+using Ene.Core.Servers;
+using System.Linq;
 
 namespace Ene.Modules
 {
@@ -31,12 +34,24 @@ namespace Ene.Modules
             var embed = new EmbedBuilder();
             embed.WithColor(Global.mainColor);
 
+            var serverResult = from s in Servers.servers
+                               where
+                               s.GuildID == Context.Guild.Id
+                               select s;
+            var serverInfo = serverResult.FirstOrDefault();
+            if (serverInfo == null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
+
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)
             {
                 embed.WithDescription("Please join the channel before asking me!");
                 await ReplyAsync("", false, embed.Build());
                 return;
+            }
+            else if (user.VoiceChannel.Id != serverInfo.MusicVoiceChannelID && serverInfo.MusicVoiceChannelID != 0)
+            {
+                embed.WithDescription(String.Format("Sorry, but I can not play music in that voice channel."));
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -53,11 +68,23 @@ namespace Ene.Modules
             var embed = new EmbedBuilder();
             embed.WithColor(Global.mainColor);
 
+            var serverResult = from s in Servers.servers
+                               where
+                               s.GuildID == Context.Guild.Id
+                               select s;
+            var serverInfo = serverResult.FirstOrDefault();
+            if (serverInfo == null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
+
             var user = Context.User as SocketGuildUser;
 
             if (user.VoiceChannel is null)
             {
                 embed.WithDescription("Please join the channel before asking me!");
+            }
+            else if (user.VoiceChannel.Id != serverInfo.MusicVoiceChannelID && serverInfo.MusicVoiceChannelID != 0)
+            {
+                embed.WithDescription(String.Format("Sorry, but I can not leave since you're not in the voice channel!"));
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {
@@ -73,12 +100,24 @@ namespace Ene.Modules
             var embed = new EmbedBuilder();
             embed.WithColor(Global.mainColor);
 
+            var serverResult = from s in Servers.servers
+                               where
+                               s.GuildID == Context.Guild.Id
+                               select s;
+            var serverInfo = serverResult.FirstOrDefault();
+            if (serverInfo == null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
+
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)
             {
                 embed.WithDescription("Please join the channel before asking me!");
                 await ReplyAsync("", false, embed.Build());
                 return;
+            }
+            else if (user.VoiceChannel.Id != serverInfo.MusicVoiceChannelID && serverInfo.MusicVoiceChannelID != 0)
+            {
+                embed.WithDescription(String.Format("Sorry, but I can not leave since you're not in the voice channel!"));
+                await ReplyAsync("", false, embed.Build());
             }
             else
             {

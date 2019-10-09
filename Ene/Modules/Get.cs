@@ -15,6 +15,7 @@ using Discord.Rest;
 using Discord.Audio;
 
 using Ene.Core.UserAccounts;
+using Ene.Preconditions;
 using Ene.SystemLang;
 
 using RedditSharp;
@@ -27,6 +28,7 @@ using JikanDotNet;
 namespace Ene.Modules
 {
     [Group("get")]
+    [RequireBotChannel()]
     public class Get : ModuleBase<SocketCommandContext>
     {
         [Alias("random person.", "a random person", "a random person.")]
@@ -81,6 +83,31 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
+        [Alias("this season's anime")]
+        [Command("this season's anime.")]
+        public async Task GetSeason()
+        {
+            IJikan jikan = new Jikan(true);
+            Season season = jikan.GetSeason().Result;
+            string list = "";
+            int i = 1, limit = 20;
+            var embed = new EmbedBuilder();
+            foreach (var seasonEntry in season.SeasonEntries)
+            {
+                if (i < limit + 1)
+                {
+                    list += (i + ". " + seasonEntry.Title + "\n");
+                    i++;
+                }
+                else break;
+            }
+
+            embed.WithTitle(season.SeasonName + " " + season.SeasonYear + " Anime");
+            embed.WithDescription(list);
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+
         //keep Jikan updated to avoid null exception
         [Alias("anime")]
         [Command("anime:")]
@@ -116,31 +143,6 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
-        [Alias("this season's anime")]
-        [Command("this season's anime.")]
-        public async Task GetSeason()
-        {
-            IJikan jikan = new Jikan(true);
-            Season season = jikan.GetSeason().Result;
-            string list = "";
-            int i = 1, limit = 20;
-            var embed = new EmbedBuilder();
-            foreach (var seasonEntry in season.SeasonEntries)
-            {
-                if (i < limit + 1)
-                {
-                    list += (i + ". " + seasonEntry.Title + "\n");
-                    i++;
-                }
-                else break;
-            }
-
-            embed.WithTitle(season.SeasonName + " " + season.SeasonYear + " Anime");
-            embed.WithDescription(list);
-            embed.WithColor(Global.mainColor);
-            await Context.Channel.SendMessageAsync("", false, embed.Build());
-        }
-
         private static string GetIsAnimeAiring(AnimeSearchResult animeSearchResult)
         {
             if (animeSearchResult.Results.First().Airing) return "Currently Airing";
@@ -157,6 +159,62 @@ namespace Ene.Modules
             if (animeSearchResult.Results.First().EndDate.HasValue == false) return "?";
             else return animeSearchResult.Results.First().EndDate.ToString();
         }
+
+        [Alias("character")]
+        [Command("character:")]
+        public async Task GetAnimeCharacter([Remainder]string character)
+        {
+            IJikan jikan = new Jikan(true);
+            var characterSearchResult = await jikan.SearchCharacter(character);
+
+            var embed = new EmbedBuilder();
+            var fieldAltNames = new EmbedFieldBuilder()
+                    .WithName("Alternate Names")
+                    .WithValue(GetAltCharacterNames(characterSearchResult))
+                    .WithIsInline(true);
+            /*
+            var fieldA = new EmbedFieldBuilder()
+                    .WithName("Anime")
+                    .WithValue(GetAnimeography(characterSearchResult))
+                    .WithIsInline(true);
+                    */
+
+
+            embed.WithTitle(characterSearchResult.Results.First().Name + "\n" + characterSearchResult.Results.First().URL);
+            embed.AddField(fieldAltNames);
+            embed.WithThumbnailUrl(characterSearchResult.Results.First().ImageURL);
+            embed.WithColor(Global.mainColor);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+        public string GetAltCharacterNames(CharacterSearchResult characterSearchResult)
+        {
+            if (characterSearchResult.Results.First().AlternativeNames != null /*|| characterSearchResult.Results.First().AlternativeNames.Count != 0*/)
+            {
+                string names = "";
+                foreach (string name in characterSearchResult.Results.First().AlternativeNames)
+                {
+                    names += (name + "\n");
+                }
+                return names;
+            }
+            else return "N/A";
+        }
+
+        /*
+        public static string GetAnimeography(CharacterSearchResult characterSearchResult)
+        {
+            if (characterSearchResult.Results.First().Animeography != null)
+            {
+                string animes = "";
+                foreach (var anime in characterSearchResult.Results.First().Animeography)
+                {
+                    animes += (anime.Name + "\n");
+                }
+                return animes;
+            }
+            else return "N/A";
+        }
+        */
 
         [Alias("subreddit")]
         [Command("subreddit:")]
@@ -284,6 +342,13 @@ namespace Ene.Modules
 
             var account = UserAccounts.GetAccount(target);
             await Context.Channel.SendMessageAsync($"{target.Username} has { account.XP} XP and {account.Points} points.");
+        }
+
+        [Command("data count.")]
+        public async Task GetData()
+        {
+            await Context.Channel.SendMessageAsync("Data has " + DataStorage.GetPairsCount() + " pairs.");
+            DataStorage.AddPairToStorage("Count" + DataStorage.GetPairsCount() + " " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString(), "TheCount" + DataStorage.GetPairsCount());
         }
     }
 }

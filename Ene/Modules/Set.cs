@@ -15,7 +15,8 @@ using Discord.Rest;
 using Discord.Audio;
 
 using Ene.Core.UserAccounts;
-using Ene.Core.Verification;
+using Ene.Core.Servers;
+using Ene.Preconditions;
 using Ene.SystemLang;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
@@ -35,10 +36,34 @@ namespace Ene.Modules
     {
         [Alias("verification channel", "verification channel to:", "verification channel to")]
         [Command("verification channel:")]
-        public async Task SetVerificationChannel(SocketGuildChannel guildChannel, ulong roleID)
+        public async Task SetVerificationChannel(SocketGuildChannel guildChannel)
         {
-            VerifiedChannels.GetChannelInfo(Context.Guild.Id, guildChannel.Id, roleID);
-            await Context.Channel.SendMessageAsync("All new members will now need to verify in #" + guildChannel + " before being able to access channels.");
+            Servers.SetVerificationChannel(Context.Guild.Id, guildChannel.Id);
+            await Context.Channel.SendMessageAsync("All new members will now need to verify in #" + guildChannel + " before they can access channels!");
+        }
+
+        [Alias("verification role", "verification role to:", "verification role to")]
+        [Command("verification role:")]
+        public async Task SetVerificationRole(SocketRole guildRole)
+        {
+            Servers.SetVerifiedRole(Context.Guild.Id, guildRole.Id);
+            await Context.Channel.SendMessageAsync("All new members will now get the role " + guildRole + " when they become verified!");
+        }
+
+        [Alias("bot channel", "bot channel to:", "bot channel to")]
+        [Command("bot channel:")]
+        public async Task SetBotChannel(SocketGuildChannel guildChannel)
+        {
+            Servers.SetBotChannel(Context.Guild.Id, guildChannel.Id);
+            await Context.Channel.SendMessageAsync("Main bot commands can now only be used in #" + guildChannel + "!");
+        }
+
+        [Alias("music voice channel", "music voice channel to:", "music voice channel to")]
+        [Command("music text channel:")]
+        public async Task SetMusicChannel(SocketVoiceChannel voiceChannel)
+        {
+            Servers.SetMusicTextChannel(Context.Guild.Id, voiceChannel.Id);
+            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + voiceChannel + "!");
         }
     }
 }

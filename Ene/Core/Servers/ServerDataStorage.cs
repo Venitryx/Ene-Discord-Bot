@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace Ene.Core.Verification
+namespace Ene.Core.Servers
 {
-    public static class ChannelDataStorage
+    public static class ServerDataStorage
     {
-        public static void SaveVerificationInfo(IEnumerable<VerifiedChannel> verifiedChannel, string filePath)
+        public static void SaveVerificationInfo(IEnumerable<Server> verifiedChannel, string filePath)
         {
             string json = JsonConvert.SerializeObject(verifiedChannel, Formatting.Indented);
             File.WriteAllText(filePath, json);
@@ -37,13 +37,13 @@ namespace Ene.Core.Verification
             string[] trueDirAndFilePath = new string[] { folderPath, wholeFilePath };
             return trueDirAndFilePath;
         }
-        public static IEnumerable<VerifiedChannel> LoadVerificationInfo(string filePath)
+        public static IEnumerable<Server> LoadVerificationInfo(string filePath)
         {
             string[] dirAndFilePath = GetDirAndFilePath(filePath);
             if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
-            if (!File.Exists(dirAndFilePath[1])) VerifiedChannels.Initialize();
+            if (!File.Exists(dirAndFilePath[1])) Servers.Initialize();
             string json = File.ReadAllText(filePath);
-            return JsonConvert.DeserializeObject<List<VerifiedChannel>>(json);
+            return JsonConvert.DeserializeObject<List<Server>>(json);
         }
     }
 }

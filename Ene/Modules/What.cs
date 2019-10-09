@@ -15,6 +15,7 @@ using Discord.Rest;
 using Discord.Audio;
 
 using Ene.Core.UserAccounts;
+using Ene.Preconditions;
 using Ene.SystemLang;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
@@ -30,6 +31,7 @@ using JikanDotNet;
 namespace Ene.Modules
 {
     [Group("what")]
+    [RequireBotChannel()]
     public class What : ModuleBase<SocketCommandContext>
     {
         [Alias("can you do?")]

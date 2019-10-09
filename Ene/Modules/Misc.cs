@@ -15,7 +15,8 @@ using Discord.Rest;
 using Discord.Audio;
 
 using Ene.Core.UserAccounts;
-using Ene.Core.Verification;
+using Ene.Core.Servers;
+using Ene.Preconditions;
 using Ene.SystemLang;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
@@ -34,6 +35,7 @@ namespace Ene.Modules
     public class Misc : ModuleBase<SocketCommandContext>
     {
         [RequireOwner]
+        [RequireBotChannel()]
         [Command("react")]
         public async Task HandleReaction()
         {
@@ -61,6 +63,7 @@ namespace Ene.Modules
         }
 
         [RequireOwner]
+        [RequireBotChannel()]
         [Alias("go to sleep")]
         [Command("go to sleep.")]
         public async Task Sleep()
@@ -72,8 +75,9 @@ namespace Ene.Modules
             await Context.Client.SetStatusAsync(UserStatus.Offline);
         }
 
+        //todo make it so only unverified users can verify
         [Command("verify:")]
-        public async Task Verify(string firstName, string lastName, int bookNumber, [Remainder]string nickname = null)
+        public async Task Verify(string firstName, string lastName, int advNumber, int studentID, [Remainder]string nickname = null)
         {
             var embed = new EmbedBuilder();
             string message = "Yokoso, {0}.";
@@ -83,11 +87,9 @@ namespace Ene.Modules
             await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(message));
             await Context.Channel.SendMessageAsync("", false, embed.Build());
 
-            VerifiedChannels.AddUserVerified((SocketGuildUser)Context.User, Context.Guild.Id);
-            /*if(nickname != null)
-                await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = firstName + " " + lastName.Substring(0, 1) + ". [" + bookNumber + "] aka " + nickname);
-            else*/ await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = firstName + " " + lastName.Substring(0, 1) + ". [" + bookNumber + "]");
-
+            Servers.AddUserVerified((SocketGuildUser)Context.User, firstName, lastName, advNumber, studentID, Context.Guild.Id);
+            if(nickname != null)
+                await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = nickname);
         }
 
 
@@ -147,6 +149,7 @@ namespace Ene.Modules
         }
 
         [Command("are you")]
+        [RequireBotChannel()]
         public async Task AskAreYou(string emote)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -239,15 +242,6 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync($"{target.Username} gained {xp} XP.");
         }
 
-
-        [Alias("what are my stats?")]
-        [Command("what are my stats")]
-        public async Task MyStats()
-        {
-            var account = UserAccounts.GetAccount(Context.User);
-            await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix($"You have {account.XP} XP and {account.Points} points."));
-        }
-
         [Command("delete messages:")]
         public async Task DeleteMessages(string ammount)
         {
@@ -326,13 +320,6 @@ namespace Ene.Modules
                     await message.ModifyAsync(x => x.Content = messages[i]);
                 }
             }
-        }
-
-        [Command("get data count.")]
-        public async Task GetData()
-        {
-            await Context.Channel.SendMessageAsync("Data has " + DataStorage.GetPairsCount() + " pairs.");
-            DataStorage.AddPairToStorage("Count" + DataStorage.GetPairsCount() + " " + DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString(), "TheCount" + DataStorage.GetPairsCount());
         }
 
         /*

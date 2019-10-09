@@ -10,7 +10,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
 using Ene.Core;
-using Ene.Core.Verification;
+using Ene.Core.Servers;
 using Ene.Services;
 using Ene.SystemLang.MiscCommands.AreYouCommand;
 using Ene.SystemLang.MiscCommands.LikeCommands;
@@ -34,7 +34,7 @@ namespace Ene
             LaunchLavaLink();
             Likes.Reload();
             Commands.LoadCommandInfo();
-            VerifiedChannels.LoadVerificationInfo();
+            Servers.LoadVerificationInfo();
 
             if (Config.bot.token == "" || Config.bot.token == null)
             {
