@@ -75,7 +75,7 @@ namespace Ene.Modules
             await Context.Client.SetStatusAsync(UserStatus.Offline);
         }
 
-        //todo make it so only unverified users can verify
+        [RequireVerificationChannel()]
         [Command("verify:")]
         public async Task Verify(string firstName, string lastName, int advNumber, int studentID, [Remainder]string nickname = null)
         {

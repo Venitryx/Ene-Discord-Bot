@@ -58,12 +58,20 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("Main bot commands can now only be used in #" + guildChannel + "!");
         }
 
-        [Alias("music voice channel", "music voice channel to:", "music voice channel to")]
+        [Alias("music text channel", "music text channel to:", "music text channel to")]
         [Command("music text channel:")]
-        public async Task SetMusicChannel(SocketVoiceChannel voiceChannel)
+        public async Task SetTextChannel(SocketGuildChannel guildChannel)
         {
-            Servers.SetMusicTextChannel(Context.Guild.Id, voiceChannel.Id);
-            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + voiceChannel + "!");
+            Servers.SetMusicTextChannel(Context.Guild.Id, guildChannel.Id);
+            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + guildChannel + "!");
+        }
+
+        [Alias("music voice channel", "music voice channel to:", "music voice channel to")]
+        [Command("music voice channel:")]
+        public async Task SetMusicChannel(SocketGuildChannel guildChannel)
+        {
+            Servers.SetMusicVoiceChannel(Context.Guild.Id, guildChannel.Id);
+            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + guildChannel + "!");
         }
     }
 }
