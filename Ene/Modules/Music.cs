@@ -15,6 +15,7 @@ using System.Linq;
 
 namespace Ene.Modules
 {
+    [RequireMusicChannel()]
     public class Music : ModuleBase<SocketCommandContext>
     {
         
@@ -116,7 +117,7 @@ namespace Ene.Modules
             }
             else if (user.VoiceChannel.Id != serverInfo.MusicVoiceChannelID && serverInfo.MusicVoiceChannelID != 0)
             {
-                embed.WithDescription(String.Format("Sorry, but I can not leave since you're not in the voice channel!"));
+                embed.WithDescription(String.Format("Sorry, but I can not play since you're not in the right voice channel!"));
                 await ReplyAsync("", false, embed.Build());
             }
             else

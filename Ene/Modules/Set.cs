@@ -68,10 +68,10 @@ namespace Ene.Modules
 
         [Alias("music voice channel", "music voice channel to:", "music voice channel to")]
         [Command("music voice channel:")]
-        public async Task SetMusicChannel(SocketGuildChannel guildChannel)
+        public async Task SetMusicVoiceChannel(ulong voiceChannelID)
         {
-            Servers.SetMusicVoiceChannel(Context.Guild.Id, guildChannel.Id);
-            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + guildChannel + "!");
+            Servers.SetMusicVoiceChannel(Context.Guild.Id, voiceChannelID);
+            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + voiceChannelID + "!");
         }
     }
 }
