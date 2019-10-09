@@ -92,6 +92,12 @@ namespace Ene.Modules
                 await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = nickname);
         }
 
+        [Command("change nick")]
+        public async Task Nick([Remainder]string nickname)
+        {
+            await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = nickname);
+        }
+
 
         [RequireUserPermission(GuildPermission.SendMessages)]
         [Alias("say")]
