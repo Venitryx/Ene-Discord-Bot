@@ -13,7 +13,7 @@ Sets a specified text channel as default channel for listening to commands.
 Ene will join the voice channel you're in if no voice channel has been set. Otherwise, it will only join if you're in the right voice channel.
 
 -"leave the channel."
-Ene will leave the voice channel you're in if no voice channel has been set. Otherwise, it will only join if you're in the right voice channel.
+Ene will leave the voice channel you're in if no voice channel has been set. Otherwise, it will only leave if you're in the right voice channel.
 
 -"play {YouTube/SoundCloud} {link/search}"
 Accepts YouTube, Soundcloud. Planning to implement Spotify, and NicoNicoDouga.
