@@ -9,6 +9,7 @@ using Discord;
 using Discord.WebSocket;
 
 using Ene.SystemLang.MiscCommands.ShouldICommand;
+using Ene.Core.Songs;
 
 namespace Ene.Core
 {
@@ -59,13 +60,13 @@ namespace Ene.Core
             return Task.CompletedTask;
         }
 
+
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)
         {
-            string songName = SongDisplay.getNameOfSong(SongDisplay.songIndex, SongDisplay.isJapanese);
-            game = new Game(songName, ActivityType.Listening);
-            SongDisplay.songIndex++;
+            Game game = SongDisplay.pickRandomSongDisplay();
             await Global.Client.SetActivityAsync(game);
         }
+        
 
         private static async void OnAfkTimerTicked(object sender, ElapsedEventArgs e)
         {

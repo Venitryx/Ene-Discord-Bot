@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Diagnostics;
+
+using IronOcr;
 
 using Discord;
 using Discord.Commands;
@@ -29,6 +32,7 @@ using CoreHtmlToImage;
 using static RedditSharp.Things.VotableThing;
 using JikanDotNet;
 using Ene.Handlers;
+using System.Net.Http;
 
 namespace Ene.Modules
 {
@@ -90,6 +94,29 @@ namespace Ene.Modules
             Servers.AddUserVerified((SocketGuildUser)Context.User, firstName, lastName, advNumber, studentID, Context.Guild.Id);
             if(nickname != null)
                 await Context.Guild.GetUser(Context.User.Id).ModifyAsync(x => x.Nickname = nickname);
+        }
+
+        [Command("scan")]
+        public async Task ScanFile()
+        {
+            AutoOcr OCR = new AutoOcr() { ReadBarCodes = false };
+
+            var attachments = Context.Message.Attachments;
+
+            WebClient myWebClient = new WebClient();
+
+            string file = attachments.ElementAt(0).Filename;
+            string url = attachments.ElementAt(0).Url;
+
+            byte[] buffer = myWebClient.DownloadData(url);
+
+            await Context.Channel.SendFileAsync(new MemoryStream(buffer), "Unknown.png");
+            if (!File.Exists(String.Format("Pictures/Test-{0}.png", Context.User.Username)))
+                File.WriteAllBytes(String.Format("Pictures/Test-{0}.png", Context.User.Username), buffer);
+
+            await Task.Delay(5000);
+            var results = OCR.Read(String.Format("Pictures/Test-{0}.png", Context.User.Username));
+            await ReplyAsync(results.Text);
         }
 
         [Command("change nick")]
@@ -328,11 +355,16 @@ namespace Ene.Modules
             }
         }
 
-        /*
+
+
+
+
+        
         [Command("hello")]
         public async Task Hello()
         {
             
+            /*
             var converter = new HtmlConverter();
             string html = String.Format($"<html>\n < h1 > Welcome {Context.User.Username}!</ h1 >\n </ html > ");
             string css = "<style>\n @font-face { font - family: 'cargo'; src: url('C:/Users/codev/Downloads/Website/8thCargo.ttf') format('truetype'); }\n\n body {\n background: rgba(0, 0, 0, .5)\n url(\"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7c6ac08c-8216-4359-99c9-5f4908ab3d37/d7ivgaj-d4fdc395-68e1-4f54-b9c3-c3e6bad06f7b.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzdjNmFjMDhjLTgyMTYtNDM1OS05OWM5LTVmNDkwOGFiM2QzN1wvZDdpdmdhai1kNGZkYzM5NS02OGUxLTRmNTQtYjljMy1jM2U2YmFkMDZmN2IucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.9aqFbPX_v_vot7iHKDjM019Qx9atdg8GvWcwEXAb2Hs\") no-repeat scroll 0% 0%;\n background-blend - mode: darken;\n    }\n\n h1 {\n position: absolute;\n top: 5 %;\n left: 12.5 %;\n font-family: 'cargo', 'Comic Sans MS';\n color: rgb(103, 163, 227);\n font-size: 50px;\n transform: translate(-50 %, -50 %);\n    }\n\n </ style > ";
@@ -340,22 +372,22 @@ namespace Ene.Modules
 
             var html1 = $@"<div><strong>Hello {Context.User.Username}</strong> World!</div>";
             var htmlBytes = converter.FromHtmlString(html1);
-            //File.WriteAllBytes(String.Format($"Pictures/EneWelcome-{Context.User.Username}.png"), bytes);
+            File.WriteAllBytes(String.Format($"Pictures/EneWelcome-{Context.User.Username}.png"), bytes);
             await Context.Channel.SendFileAsync(new MemoryStream(htmlBytes), "Ene.png");
-            
+            */
             
             //NRecoLT needs license
-            //var converter = new HtmlToImageConverter
-            //{
-            //    Width = 500,
-            //    Height = 150
-            //};
-            //string html = String.Format($"<html>\n < h1 > Welcome {Context.User.Username}!</ h1 >\n </ html > ");
-            //string css = "<style>\n @font-face { font - family: 'cargo'; src: url('C:/Users/codev/Downloads/Website/8thCargo.ttf') format('truetype'); }\n\n body {\n background: rgba(0, 0, 0, .5)\n url(\"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7c6ac08c-8216-4359-99c9-5f4908ab3d37/d7ivgaj-d4fdc395-68e1-4f54-b9c3-c3e6bad06f7b.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzdjNmFjMDhjLTgyMTYtNDM1OS05OWM5LTVmNDkwOGFiM2QzN1wvZDdpdmdhai1kNGZkYzM5NS02OGUxLTRmNTQtYjljMy1jM2U2YmFkMDZmN2IucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.9aqFbPX_v_vot7iHKDjM019Qx9atdg8GvWcwEXAb2Hs\") no-repeat scroll 0% 0%;\n background-blend - mode: darken;\n    }\n\n h1 {\n position: absolute;\n top: 5 %;\n left: 12.5 %;\n font-family: 'cargo', 'Comic Sans MS';\n color: rgb(103, 163, 227);\n font-size: 50px;\n transform: translate(-50 %, -50 %);\n    }\n\n </ style > ";
-            //var pngBytes = converter.GenerateImage(css + html, NReco.ImageGenerator.ImageFormat.Png);
-            //await Context.Channel.SendFileAsync(new MemoryStream(pngBytes), "Ene.png");
+            var converter = new HtmlToImageConverter
+            {
+                Width = 500,
+                Height = 150
+            };
+            string html = String.Format($"<html>\n < h1 > Welcome {Context.User.Username}!</ h1 >\n </ html > ");
+            string css = "<style>\n @font-face { font - family: 'cargo'; src: url('C:/Users/codev/Downloads/Website/8thCargo.ttf') format('truetype'); }\n\n body {\n background: rgba(0, 0, 0, .5)\n url(\"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7c6ac08c-8216-4359-99c9-5f4908ab3d37/d7ivgaj-d4fdc395-68e1-4f54-b9c3-c3e6bad06f7b.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzdjNmFjMDhjLTgyMTYtNDM1OS05OWM5LTVmNDkwOGFiM2QzN1wvZDdpdmdhai1kNGZkYzM5NS02OGUxLTRmNTQtYjljMy1jM2U2YmFkMDZmN2IucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.9aqFbPX_v_vot7iHKDjM019Qx9atdg8GvWcwEXAb2Hs\") no-repeat scroll 0% 0%;\n background-blend - mode: darken;\n    }\n\n h1 {\n position: absolute;\n top: 5 %;\n left: 12.5 %;\n font-family: 'cargo', 'Comic Sans MS';\n color: rgb(103, 163, 227);\n font-size: 50px;\n transform: translate(-50 %, -50 %);\n    }\n\n </ style > ";
+            var pngBytes = converter.GenerateImage(css + html, NReco.ImageGenerator.ImageFormat.Png);
+            await Context.Channel.SendFileAsync(new MemoryStream(pngBytes), "Ene.png");
             
         }
-        */
+        
     }
 }

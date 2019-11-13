@@ -17,15 +17,14 @@ namespace Ene.Preconditions
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var serverResult = from s in Servers.servers
-                               where
-                               s.GuildID == context.Guild.Id
+                               where s.GuildID == context.Guild.Id
                                select s;
             var serverInfo = serverResult.FirstOrDefault();
             if (serverInfo == null) serverInfo = Servers.GetServerInfo(context.Guild.Id);
 
             if (context.Channel.Id != serverInfo.VerificationChannelID)
             {
-                return Task.FromResult(PreconditionResult.FromError($"Wrong channel."));
+                return Task.FromResult(PreconditionResult.FromError($"Sorry, but you can't use that command in this channel!"));
             }
             else
             {

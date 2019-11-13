@@ -27,6 +27,7 @@ using Newtonsoft.Json;
 using CoreHtmlToImage;
 using static RedditSharp.Things.VotableThing;
 using JikanDotNet;
+using Ene.Core.Songs;
 
 namespace Ene.Modules
 {
@@ -71,12 +72,37 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed);
         }
 
-        [Alias("are my stats?")]
-        [Command("are my stats")]
+        [Alias("are my stats")]
+        [Command("are my stats?")]
         public async Task MyStats()
         {
             var account = UserAccounts.GetAccount(Context.User);
             await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix($"You have {account.XP} XP and {account.Points} points."));
         }
+
+        /*
+        [Alias("are you listening to")]
+        [Command("are you listening to?")]
+        public async Task SongListeningTo()
+        {
+            if (Songs.songConfig.UseRomanizedNames)
+            {
+
+                Game game = new Game(songs.ElementAt(index).GetRomanizedTitle(), ActivityType.Listening);
+                return game;
+            }
+            else if (!Songs.songConfig.UseRomanizedNames)
+            {
+
+                Game game = new Game(songs.ElementAt(index).GetTitle(), ActivityType.Listening);
+                return game;
+            }
+
+            var embed = new EmbedBuilder()
+                .WithDescription(String.Format("[{0}]", ))
+                .WithColor(Global.mainColor)
+                .Build();
+        }
+        */
     }
 }

@@ -27,7 +27,7 @@ namespace Ene.Modules
         }
         
 
-
+        //work on order so that it joins the default voice channel if it is set and the user is not in a channel, and if the voice channel is not set, it joins the channel the user is in.
         [Alias("join the channel", "join.", "join")]
         [Command("join the channel.")]
         public async Task Join()
@@ -40,7 +40,7 @@ namespace Ene.Modules
                                s.GuildID == Context.Guild.Id
                                select s;
             var serverInfo = serverResult.FirstOrDefault();
-            if (serverInfo == null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
+            if (serverInfo is null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
 
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)
@@ -74,7 +74,7 @@ namespace Ene.Modules
                                s.GuildID == Context.Guild.Id
                                select s;
             var serverInfo = serverResult.FirstOrDefault();
-            if (serverInfo == null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
+            if (serverInfo is null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
 
             var user = Context.User as SocketGuildUser;
 
@@ -106,7 +106,7 @@ namespace Ene.Modules
                                s.GuildID == Context.Guild.Id
                                select s;
             var serverInfo = serverResult.FirstOrDefault();
-            if (serverInfo == null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
+            if (serverInfo is null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
 
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null)

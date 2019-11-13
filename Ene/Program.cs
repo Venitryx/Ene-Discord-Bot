@@ -17,6 +17,7 @@ using Ene.SystemLang.MiscCommands.LikeCommands;
 using Ene.SystemLang.MiscCommands.ShouldICommand;
 
 using Victoria;
+using Ene.Core.Songs;
 
 namespace Ene
 {
@@ -35,6 +36,7 @@ namespace Ene
             Likes.Reload();
             Commands.LoadCommandInfo();
             Servers.LoadVerificationInfo();
+            Songs.LoadSongConfig();
 
             if (Config.bot.token == "" || Config.bot.token == null)
             {
@@ -91,7 +93,11 @@ namespace Ene
         }
         private void LaunchLavaLink()
         {
-            Process.Start(new ProcessStartInfo("cmd.exe", "/c java -jar Lavalink.jar"));
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo("cmd.exe", "/c java -jar Lavalink.jar");
+            process.Start();
+            process.WaitForExit(1000 * 40);
+
         }
         private IServiceProvider SetUpServices()
             => new ServiceCollection()

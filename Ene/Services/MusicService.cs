@@ -45,9 +45,9 @@ namespace Ene.Services
         {
             var _player = _lavaSocketClient.GetPlayer(guildID);
 
-            if (search.Equals("YouTube"))
+            if (search.Equals("YouTube") || search.Equals("youtube") || search.Equals("yt"))
             {
-                var results = await _lavaRestClient.SearchYouTubeAsync(query); //able to play YouTube searches but not youtube direct links. Used to do both before.
+                var results = await _lavaRestClient.SearchYouTubeAsync(query);
                 if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
                 {
                     string description = String.Format("Sorry, that song doesn't exist or it can't be loaded: {0}.", query);
@@ -72,7 +72,7 @@ namespace Ene.Services
                     return await EmbedHandler.CreateBasicEmbedTitleOnly(description, Global.mainColor, imageURL);
                 }
             }
-            else if (search.Equals("SoundCloud"))
+            else if (search.Equals("SoundCloud") || search.Equals("soundcloud") || search.Equals("sc"))
             {
                 var results = await _lavaRestClient.SearchSoundcloudAsync(query);
                 if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)

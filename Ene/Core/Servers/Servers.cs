@@ -10,7 +10,7 @@ namespace Ene.Core.Servers
     public static class Servers
     {
         internal static List<Server> servers;
-        private static string commandLogFilePath = "Resources/servers.json";
+        private static string serverFilePath = "Resources/servers.json";
 
         static Servers()
         {
@@ -19,13 +19,13 @@ namespace Ene.Core.Servers
         //saves file
         public static void SaveVerificationInfo()
         {
-            ServerDataStorage.SaveVerificationInfo(servers, commandLogFilePath);
+            ServerDataStorage.SaveVerificationInfo(servers, serverFilePath);
         }
 
         //loads file
         public static void LoadVerificationInfo()
         {
-            servers = ServerDataStorage.LoadVerificationInfo(commandLogFilePath).ToList();
+            servers = ServerDataStorage.LoadVerificationInfo(serverFilePath).ToList();
         }
 
         public static void Initialize()
@@ -39,9 +39,6 @@ namespace Ene.Core.Servers
             return GetOrCreateServerInfo(guildID);
 
         }
-
-        //needs verification channel before verification command
-        //method for adding users to verified group
 
         private static Server GetOrCreateServerInfo(ulong guildID)
         {

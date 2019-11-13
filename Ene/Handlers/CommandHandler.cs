@@ -79,10 +79,10 @@ namespace Ene
                             await context.Channel.SendMessageAsync("", false, embed.Build());
                             break;
                         case CommandError.Exception:
-                            await context.Channel.SendMessageAsync($"Something went wrong: ({result.ErrorReason})");
+                            await context.Channel.SendMessageAsync(result.ErrorReason);
                             break;
                         default:
-                            await context.Channel.SendMessageAsync($"Something went wrong: ({result.ErrorReason})");
+                            await context.Channel.SendMessageAsync(result.ErrorReason);
                             break;
                     }
                 }

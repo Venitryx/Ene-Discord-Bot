@@ -24,42 +24,20 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
             File.WriteAllText(filePath, json);
         }
 
-        public static string[] GetDirAndFilePath(string filePath)
-        {
-            string[] splitFilePath = filePath.Split(new char[] { '/'}, StringSplitOptions.RemoveEmptyEntries);
-            string folderPath = "";
-            string wholeFilePath = "";
-            foreach (string folder in splitFilePath)
-            {
-                if (!folder.Contains('.'))
-                {
-                    folderPath += (folder + '/');
-                }
-                else
-                {
-                    folderPath = folderPath.Substring(0, folderPath.Length-1);
-                    wholeFilePath = folderPath + "/" + folder;
-                    break;
-                }
-            }
-            string[] trueDirAndFilePath = new string[] { folderPath, wholeFilePath};
-            return trueDirAndFilePath;
-        }
-
         public static IEnumerable<Like> LoadLikes(string filePath)
         {
-            string[] dirAndFilePath = GetDirAndFilePath(filePath);
-            if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
-            if (!File.Exists(dirAndFilePath[1])) Likes.InitializeLikes();
+            string folderPath = Global.GetFolderPath(filePath);
+            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+            if (!File.Exists(folderPath)) Likes.InitializeLikes();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<Like>>(json);
         }
 
         public static DefaultLikeMessagesData LoadDefaultLikeMessages(string filePath)
         {
-            string[] dirAndFilePath = GetDirAndFilePath(filePath);
-            if (!Directory.Exists(dirAndFilePath[0])) Directory.CreateDirectory(dirAndFilePath[0]);
-            if (!File.Exists(dirAndFilePath[1])) Likes.InitializeDefaultLikeMessages();
+            string folderPath = Global.GetFolderPath(filePath);
+            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+            if (!File.Exists(folderPath)) Likes.InitializeDefaultLikeMessages();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<DefaultLikeMessagesData>(json);
         }
