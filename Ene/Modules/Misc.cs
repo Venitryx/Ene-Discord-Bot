@@ -49,22 +49,6 @@ namespace Ene.Modules
             Global.MessageIdToTrack = msg.Id;
         }
 
-        [RequireOwner]
-        [Alias("leave all servers.")]
-        [Command("leave all servers")]
-        public async Task LeaveAllServers()
-        {
-            foreach (var guild in Context.Client.Guilds)
-            {
-                if(guild.Id != 446409245571678208 || guild.Id != 555496686601109534)
-                {
-                    await Context.Channel.SendMessageAsync("Leaving: " + guild.Name);
-                    await guild.LeaveAsync();
-
-                }
-            }
-            await Context.Channel.SendMessageAsync(StringManipulation.AddMasterSuffix("All done!"));
-        }
 
         [RequireOwner]
         [RequireBotChannel()]

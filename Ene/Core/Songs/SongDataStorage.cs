@@ -19,8 +19,21 @@ namespace Ene.Core.Songs
 
         public static void SaveSongConfig(SongConfig songConfig, string filePath)
         {
-            string json = JsonConvert.SerializeObject(songConfig, Formatting.Indented);
-            File.WriteAllText(filePath, json);
+            //new
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.NullValueHandling = NullValueHandling.Ignore;
+            serializer.Formatting = Formatting.Indented;
+            using (StreamWriter sw = new StreamWriter(filePath))
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, songConfig);
+            }
+
+            //old
+            /*
+            string json2 = JsonConvert.SerializeObject(songConfig, Formatting.Indented);
+            File.WriteAllText(filePath, json2);
+            */
         }
 
         public static string GetFolderPath(string filePath)

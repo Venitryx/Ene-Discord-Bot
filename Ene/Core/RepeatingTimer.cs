@@ -63,7 +63,7 @@ namespace Ene.Core
 
         private static async void OnSongActivityTimerTicked(object sender, ElapsedEventArgs e)
         {
-            Game game = SongDisplay.pickRandomSongDisplay();
+            Game game = SongDisplay.pickNextSong();
             await Global.Client.SetActivityAsync(game);
         }
         

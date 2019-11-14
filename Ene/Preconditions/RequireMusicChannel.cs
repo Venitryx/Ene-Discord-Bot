@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Ene.Preconditions
 {
-    public class RequireMusicChannel : PreconditionAttribute
+    public class RequireMusicTextChannel : PreconditionAttribute
     {
-        public RequireMusicChannel()
+        public RequireMusicTextChannel()
         {
 
         }
@@ -22,7 +22,7 @@ namespace Ene.Preconditions
             var serverInfo = serverResult.FirstOrDefault();
             if (serverInfo == null) serverInfo = Servers.GetServerInfo(context.Guild.Id);
 
-            if (context.Channel.Id != serverInfo.MusicTextChannelID)
+            if (context.Channel.Id != serverInfo.MusicTextChannelID && serverInfo.MusicTextChannelID != 0)
             {
                 return Task.FromResult(PreconditionResult.FromError($"Sorry, but you can't use that command in this channel!"));
             }

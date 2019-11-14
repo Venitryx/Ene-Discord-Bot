@@ -31,6 +31,7 @@ using JikanDotNet;
 
 namespace Ene.Modules
 {
+    [RequireUserPermission(GuildPermission.ManageChannels)]
     [Group("set")]
     public class Set : ModuleBase<SocketCommandContext>
     {
@@ -68,10 +69,10 @@ namespace Ene.Modules
 
         [Alias("music voice channel", "music voice channel to:", "music voice channel to")]
         [Command("music voice channel:")]
-        public async Task SetMusicVoiceChannel(ulong voiceChannelID)
+        public async Task SetMusicVoiceChannel(SocketVoiceChannel voiceChannel)
         {
-            Servers.SetMusicVoiceChannel(Context.Guild.Id, voiceChannelID);
-            await Context.Channel.SendMessageAsync("Music commands can now only be used in #" + voiceChannelID + "!");
+            Servers.SetMusicVoiceChannel(Context.Guild.Id, voiceChannel.Id);
+            await Context.Channel.SendMessageAsync("Music commands can now only be used when someone's in " + voiceChannel.Name + "!");
         }
     }
 }

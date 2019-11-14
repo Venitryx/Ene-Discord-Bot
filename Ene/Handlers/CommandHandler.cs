@@ -78,11 +78,12 @@ namespace Ene
                             await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(answer));
                             await context.Channel.SendMessageAsync("", false, embed.Build());
                             break;
-                        case CommandError.Exception:
-                            await context.Channel.SendMessageAsync(result.ErrorReason);
-                            break;
                         default:
-                            await context.Channel.SendMessageAsync(result.ErrorReason);
+                            embed.WithDescription(result.ErrorReason);
+                            embed.WithColor(Global.mainColor);
+                            await context.Channel.TriggerTypingAsync();
+                            await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(result.ErrorReason));
+                            await context.Channel.SendMessageAsync("", false, embed.Build());
                             break;
                     }
                 }

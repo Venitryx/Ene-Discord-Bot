@@ -47,7 +47,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID 
                          select s;
             var serverInfo = result.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
             return serverInfo;
         }
         private static Server CreateServerInfo(ulong guildID)
@@ -70,7 +70,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID
                          select s;
             var serverInfo = result.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
 
             serverInfo.VerificationChannelID = channelID;
             SaveVerificationInfo();
@@ -83,7 +83,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID
                          select s;
             var serverInfo = result.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
 
             serverInfo.VerifiedRoleID = roleID;
             SaveVerificationInfo();
@@ -96,7 +96,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID
                          select s;
             var serverInfo = result.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
 
             serverInfo.BotChannelID = channelID;
             SaveVerificationInfo();
@@ -109,7 +109,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID
                          select s;
             var serverInfo = result.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
 
             serverInfo.MusicTextChannelID = channelID;
             SaveVerificationInfo();
@@ -122,7 +122,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID
                          select s;
             var serverInfo = result.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
 
             serverInfo.MusicVoiceChannelID = channelID;
             SaveVerificationInfo();
@@ -135,7 +135,7 @@ namespace Ene.Core.Servers
                          s.GuildID == guildID
                          select s;
             var serverInfo = serverResult.FirstOrDefault();
-            if (serverInfo == null) serverInfo = CreateServerInfo(guildID);
+            if (serverInfo is null) serverInfo = CreateServerInfo(guildID);
 
             ulong targetRoleID = serverInfo.VerifiedRoleID;
             var roleResult = from r in guildUser.Guild.Roles
@@ -149,7 +149,8 @@ namespace Ene.Core.Servers
                 StudentID = studentID,
                 FirstName = firstName,
                 LastName = lastName,
-                AdvisoryNumber = advNumber               
+                AdvisoryNumber = advNumber,
+                DateVerified = DateTime.Now.ToString()
             };
             var verifiedUsers = serverInfo.VerifiedUsers;
             var userResult = from u in verifiedUsers

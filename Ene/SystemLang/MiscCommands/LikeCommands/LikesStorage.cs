@@ -28,7 +28,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             string folderPath = Global.GetFolderPath(filePath);
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-            if (!File.Exists(folderPath)) Likes.InitializeLikes();
+            if (!File.Exists(filePath)) Likes.InitializeLikes();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<Like>>(json);
         }
@@ -37,7 +37,7 @@ namespace Ene.SystemLang.MiscCommands.LikeCommands
         {
             string folderPath = Global.GetFolderPath(filePath);
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-            if (!File.Exists(folderPath)) Likes.InitializeDefaultLikeMessages();
+            if (!File.Exists(filePath)) Likes.InitializeDefaultLikeMessages();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<DefaultLikeMessagesData>(json);
         }

@@ -15,10 +15,9 @@ using System.Linq;
 
 namespace Ene.Modules
 {
-    [RequireMusicChannel()]
+    [RequireMusicTextChannel()]
     public class Music : ModuleBase<SocketCommandContext>
     {
-        
         private MusicService _musicService;
 
         public Music(MusicService musicService)
@@ -96,7 +95,7 @@ namespace Ene.Modules
         }
 
         [Command("play")]
-        public async Task Play(string searchMethod, [Remainder]string query)
+        public async Task Play([Remainder]string query)
         {
             var embed = new EmbedBuilder();
             embed.WithColor(Global.mainColor);
@@ -109,21 +108,21 @@ namespace Ene.Modules
             if (serverInfo is null) serverInfo = Servers.GetServerInfo(Context.Guild.Id);
 
             var user = Context.User as SocketGuildUser;
-            if (user.VoiceChannel is null)
-            {
-                embed.WithDescription("Please join the channel before asking me!");
-                await ReplyAsync("", false, embed.Build());
-                return;
-            }
-            else if (user.VoiceChannel.Id != serverInfo.MusicVoiceChannelID && serverInfo.MusicVoiceChannelID != 0)
+            if (user.VoiceChannel.Id != serverInfo.MusicVoiceChannelID && serverInfo.MusicVoiceChannelID != 0)
             {
                 embed.WithDescription(String.Format("Sorry, but I can not play since you're not in the right voice channel!"));
                 await ReplyAsync("", false, embed.Build());
             }
+            else if (user.VoiceChannel is null)
+            {
+                embed.WithDescription("Please join a channel before asking me!");
+                await ReplyAsync("", false, embed.Build());
+                return;
+            }
             else
             {
                 await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                var result = await _musicService.PlayAsync(searchMethod, query, Context.Guild.Id);
+                var result = await _musicService.PlayAsync(query, Context.Guild.Id);
                 await ReplyAsync("", false, result);
             }
         }

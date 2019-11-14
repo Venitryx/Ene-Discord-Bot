@@ -19,7 +19,7 @@ namespace Ene.Core.Servers
         {
             string folderPath = Global.GetFolderPath(filePath);
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-            if (!File.Exists(folderPath)) Servers.Initialize();
+            if (!File.Exists(filePath)) Servers.Initialize();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<Server>>(json);
         }

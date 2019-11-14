@@ -11,7 +11,7 @@ namespace Ene.Core.Servers
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int AdvisoryNumber { get; set; }
-        public DateTime DateVerified { get; set; }
+        public string DateVerified { get; set; }
 
         public int Credits { get; set; }
         public int Level { get; set; }

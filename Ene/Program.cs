@@ -67,7 +67,7 @@ namespace Ene
             await _client.StartAsync();
             _services = SetUpServices();
             Global.Client = _client;
-            Game game = SongDisplay.pickRandomSongDisplay();
+            Game game = SongDisplay.pickRandomSong();
             await Global.Client.SetActivityAsync(game);
             await Global.Client.SetStatusAsync(UserStatus.Online);
             var cmdHandler = new CommandHandler(_client, _cmdService, _services);         

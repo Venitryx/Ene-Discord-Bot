@@ -1,7 +1,10 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Ene.Core;
+using Ene.Core.Songs;
 using Ene.Handlers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
@@ -11,7 +14,8 @@ namespace Ene.Services
 {
     public class MusicService
     {
-        
+        private enum SearchMode { SoundCloud, YouTube, YouTubePlaylist }
+
         private LavaRestClient _lavaRestClient;
         private LavaSocketClient _lavaSocketClient;
         private DiscordSocketClient _client;
@@ -41,16 +45,76 @@ namespace Ene.Services
             await _lavaSocketClient.DisconnectAsync(voiceChannel);
         }
 
-        public async Task<Embed> PlayAsync(string search, string query, ulong guildID)
+        public async Task<Embed> PlayAsync(string query, ulong guildID)
         {
+            List<Song> songs = Songs.songConfig.Songs;
+            SearchMode searchMode = SearchMode.YouTube;
             var _player = _lavaSocketClient.GetPlayer(guildID);
+            string[] args = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string search = "";
 
-            if (search.Equals("YouTube") || search.Equals("youtube") || search.Equals("yt"))
+            for (int i = 0; i < args.Length; i++)
             {
-                var results = await _lavaRestClient.SearchYouTubeAsync(query);
+                if (args[i].Equals("-p"))
+                {
+                    searchMode = SearchMode.YouTubePlaylist;
+                    search = search.Substring(0, search.Length - 1);
+                    break;
+                }
+                else if (args[i].Equals("-yt"))
+                {
+                    searchMode = SearchMode.YouTube;
+                    search = search.Substring(0, search.Length - 1);
+                    break;
+                }
+                else if (args[i].Equals("-sc"))
+                {
+                    searchMode = SearchMode.SoundCloud;
+                    search = search.Substring(0, search.Length - 1);
+                    break;
+                }
+                else
+                {
+                    search += (args[i] + " ");
+                }
+            }
+
+            if (searchMode == SearchMode.YouTubePlaylist)
+            {
+                int songCount = 0;
+                var songResults = from s in songs
+                                  where s.Tags == search
+                                  && s.Uri != null
+                                  select s;
+                foreach (var song in songResults)
+                {
+                    songCount++;
+                    var results = await _lavaRestClient.SearchYouTubeAsync(song.Uri);
+
+                    if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
+                    {
+                        songCount--;
+                    }
+
+                    var track = results.Tracks.FirstOrDefault();
+                    if (_player.IsPlaying)
+                    {
+                        _player.Queue.Enqueue(track);
+                    }
+                    else
+                    {
+                        await _player.PlayAsync(track);
+                    }
+                }
+                string description = String.Format("{0} tracks have been added to the queue!", songCount);
+                return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
+            }
+            else if (searchMode == SearchMode.YouTube)
+            {
+                var results = await _lavaRestClient.SearchYouTubeAsync(search);
                 if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
                 {
-                    string description = String.Format("Sorry, that song doesn't exist or it can't be loaded: {0}.", query);
+                    string description = String.Format("Sorry, that song doesn't exist or it can't be loaded: {0}.", search);
                     return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
                 }
 
@@ -72,12 +136,12 @@ namespace Ene.Services
                     return await EmbedHandler.CreateBasicEmbedTitleOnly(description, Global.mainColor, imageURL);
                 }
             }
-            else if (search.Equals("SoundCloud") || search.Equals("soundcloud") || search.Equals("sc"))
+            else if (searchMode == SearchMode.SoundCloud)
             {
-                var results = await _lavaRestClient.SearchSoundcloudAsync(query);
+                var results = await _lavaRestClient.SearchSoundcloudAsync(search);
                 if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed)
                 {
-                    string description = String.Format("Sorry, that song doesn't exist or it can't be loaded: {0}.", query);
+                    string description = String.Format("Sorry, that song doesn't exist or it can't be loaded: {0}.", search);
                     return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
                 }
 

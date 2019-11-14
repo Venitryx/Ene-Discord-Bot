@@ -35,7 +35,6 @@ namespace Ene.Modules
     public class Should : ModuleBase<SocketCommandContext>
     {
         private string specialMessage = "end";
-        private int b = 0;
 
         [Command("I")]
         public async Task AskShouldUser([Remainder]string msg)
@@ -86,62 +85,6 @@ namespace Ene.Modules
                         break;
                     case 4:
                         embed.WithDescription("Alright, stop bothering me already!");
-                        command.TimesRun++;
-                        Commands.SaveCommandInfo();
-                        await Context.Channel.TriggerTypingAsync();
-                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
-                        break;
-                    default:
-                        await SpamShouldICommand(command);
-                        break;
-                }
-            }
-            else if (StringManipulation.isBotOwner(Context.User))
-            {
-                var embed = new EmbedBuilder();
-                switch (command.TimesRun)
-                {
-                    case 0:
-                        command.Reply = "Yes, you should end your life.";
-                        embed.WithDescription(command.Reply);
-                        command.TimesRun++;
-                        Commands.SaveCommandInfo();
-                        await Context.Channel.TriggerTypingAsync();
-                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
-                        break;
-                    case 1:
-                        embed.WithDescription(String.Format("As I said before: \"{0}\"", command.Reply));
-                        command.TimesRun++;
-                        Commands.SaveCommandInfo();
-                        await Context.Channel.TriggerTypingAsync();
-                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
-                        break;
-                    case 2:
-                        embed.WithDescription(String.Format("You heard me: \"{0}\"", command.Reply));
-                        command.TimesRun++;
-                        Commands.SaveCommandInfo();
-                        await Context.Channel.TriggerTypingAsync();
-                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
-                        break;
-                    case 3:
-                        embed.WithDescription(String.Format("Are you messing around or actually an idiot? I said: \"{0}\"", command.Reply));
-                        command.TimesRun++;
-                        Commands.SaveCommandInfo();
-                        await Context.Channel.TriggerTypingAsync();
-                        await Task.Delay(StringManipulation.milisecondsToDelayPerCharacter(command.Reply));
-                        embed.WithColor(Global.mainColor);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
-                        break;
-                    case 4:
-                        embed.WithDescription("Urgh, go die already!");
                         command.TimesRun++;
                         Commands.SaveCommandInfo();
                         await Context.Channel.TriggerTypingAsync();

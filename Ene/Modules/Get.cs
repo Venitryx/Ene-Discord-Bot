@@ -28,9 +28,9 @@ using JikanDotNet;
 namespace Ene.Modules
 {
     [Group("get")]
-    [RequireBotChannel()]
     public class Get : ModuleBase<SocketCommandContext>
     {
+        [RequireBotChannel()]
         [Alias("random person.", "a random person", "a random person.")]
         [Command("random person")]
         public async Task GetRandomPerson()
@@ -59,6 +59,7 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
+        [RequireBotChannel()]
         [Alias("server info.", "information about this server.")]
         [Command("server info")]
         public async Task GetServerInfo()
@@ -83,6 +84,7 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
 
+        [RequireBotChannel()]
         [Alias("this season's anime")]
         [Command("this season's anime.")]
         public async Task GetSeason()
@@ -109,6 +111,7 @@ namespace Ene.Modules
         }
 
         //keep Jikan updated to avoid null exception
+        [RequireBotChannel()]
         [Alias("anime")]
         [Command("anime:")]
         public async Task GetAnime([Remainder]string anime)
@@ -160,6 +163,7 @@ namespace Ene.Modules
             else return animeSearchResult.Results.First().EndDate.ToString();
         }
 
+        [RequireBotChannel()]
         [Alias("character")]
         [Command("character:")]
         public async Task GetAnimeCharacter([Remainder]string character)
@@ -186,6 +190,7 @@ namespace Ene.Modules
             embed.WithColor(Global.mainColor);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
+
         public string GetAltCharacterNames(CharacterSearchResult characterSearchResult)
         {
             if (characterSearchResult.Results.First().AlternativeNames != null /*|| characterSearchResult.Results.First().AlternativeNames.Count != 0*/)
@@ -333,6 +338,7 @@ namespace Ene.Modules
             }
         }
 
+        [RequireBotChannel()]
         [Command("stats")]
         public async Task GetStats([Remainder]string arg = "")
         {
@@ -344,6 +350,7 @@ namespace Ene.Modules
             await Context.Channel.SendMessageAsync($"{target.Username} has { account.XP} XP and {account.Points} points.");
         }
 
+        [RequireBotChannel()]
         [Command("data count.")]
         public async Task GetData()
         {
