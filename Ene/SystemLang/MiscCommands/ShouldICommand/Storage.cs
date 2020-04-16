@@ -20,7 +20,7 @@ namespace Ene.SystemLang.MiscCommands.ShouldICommand
         {
             string folderPath = Global.GetFolderPath(filePath);
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-            if (!File.Exists(folderPath)) Commands.Initialize();
+            if (!File.Exists(filePath)) Commands.Initialize();
             string json = File.ReadAllText(filePath);
             return JsonConvert.DeserializeObject<List<ShouldI>>(json);
         }

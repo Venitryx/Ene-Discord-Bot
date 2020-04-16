@@ -128,7 +128,7 @@ namespace Ene.Core.Servers
             SaveVerificationInfo();
         }
 
-        public static void AddUserVerified(SocketGuildUser guildUser, string firstName, string lastName, int advNumber, int studentID, ulong guildID)
+        public static void AddUserVerified(SocketGuildUser guildUser, string firstName, string lastName, int grade, int studentID, ulong guildID)
         {
             var serverResult = from s in servers
                          where
@@ -149,7 +149,7 @@ namespace Ene.Core.Servers
                 StudentID = studentID,
                 FirstName = firstName,
                 LastName = lastName,
-                AdvisoryNumber = advNumber,
+                Grade = grade,
                 DateVerified = DateTime.Now.ToString()
             };
             var verifiedUsers = serverInfo.VerifiedUsers;

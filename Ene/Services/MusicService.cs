@@ -106,7 +106,7 @@ namespace Ene.Services
                         await _player.PlayAsync(track);
                     }
                 }
-                string description = String.Format("{0} tracks have been added to the queue!", songCount);
+                string description = String.Format("{0} tracks have been added to the queue!", songCount-1);
                 return await EmbedHandler.CreateBasicEmbedWOTitle(description, Global.mainColor);
             }
             else if (searchMode == SearchMode.YouTube)

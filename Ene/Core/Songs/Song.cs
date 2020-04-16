@@ -31,7 +31,8 @@ namespace Ene.Core
 
         public String GetAlbumTitle()
         {
-            return AlbumTitle;
+            if (AlbumTitle is null) return RomanizedAlbumTitle;
+            else return AlbumTitle;
         }
 
         public String GetRomanizedTitle()
@@ -41,7 +42,8 @@ namespace Ene.Core
 
         public String GetTitle()
         {
-            return Title;
+            if (Title is null) return RomanizedTitle;
+            else return Title;
         }
 
         public String GetRomanizedArtist()
@@ -51,7 +53,8 @@ namespace Ene.Core
 
         public String GetArtist()
         {
-            return Artist;
+            if (Artist is null) return RomanizedArtist;
+            else return Artist;
         }
 
         public String GetRomanizedSinger()
@@ -61,7 +64,8 @@ namespace Ene.Core
 
         public String GetSinger()
         {
-            return Singer;
+            if (Singer is null) return RomanizedSinger;
+            else return Singer;
         }
 
         public String GetUri()
